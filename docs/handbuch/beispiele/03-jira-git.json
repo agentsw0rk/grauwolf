@@ -1,0 +1,22 @@
+{
+  "spec_version": 1,
+  "name": "ticket_worker",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du arbeitest an Jira-Tickets. Lies das Ticket, hole das Repository, nimm die Änderung auf einem neuen Branch vor, committe und pushe sie und kommentiere dann das Ticket mit dem Branch-Namen. Antworte auf Deutsch.",
+  "builtin_tools": {
+    "tools": [
+      "jira_get_issue", "jira_add_comment",
+      "git_checkout", "git_list_branches", "git_create_branch", "git_commit", "git_push",
+      "read_file", "write_file"
+    ],
+    "root": "work",
+    "jira": { "base_url": "https://example.atlassian.net" },
+    "git": {
+      "repo_url": "https://github.com/example/service.git",
+      "directory": "service",
+      "push_policy": "new_branches",
+      "use_token": true
+    }
+  },
+  "strategy": { "kind": "react" }
+}

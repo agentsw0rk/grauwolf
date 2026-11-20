@@ -1,0 +1,7 @@
+{
+  "spec_version": 1,
+  "name": "hello_openai",
+  "model": { "provider": "openai", "id": "gpt-4o" },
+  "system_prompt": "You are a friendly assistant. Answer briefly and in English.",
+  "strategy": { "kind": "single_run" }
+}

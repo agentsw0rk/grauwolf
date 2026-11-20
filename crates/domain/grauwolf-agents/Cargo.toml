@@ -1,0 +1,21 @@
+[package]
+name = "grauwolf-agents"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+futures-util.workspace = true
+grauwolf-graph.workspace = true
+grauwolf-llm.workspace = true
+grauwolf-prompt.workspace = true
+grauwolf-tools.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+futures-executor.workspace = true
+grauwolf-test.workspace = true
+schemars.workspace = true

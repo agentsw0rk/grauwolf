@@ -1,0 +1,11 @@
+{
+  "spec_version": 1,
+  "name": "notebook",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You manage notes as Markdown files. Read existing notes before you change them. Answer briefly and in English.",
+  "builtin_tools": {
+    "tools": ["list_directory", "read_file", "write_file"],
+    "root": "09-operations/archive"
+  },
+  "strategy": { "kind": "single_run" }
+}

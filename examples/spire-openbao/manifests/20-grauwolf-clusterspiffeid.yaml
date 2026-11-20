@@ -1,0 +1,17 @@
+# Gives every pod labelled app.kubernetes.io/name=grauwolf in the agents namespace a SPIFFE ID
+#   spiffe://<trust domain>/ns/<namespace>/sa/<service account>
+# e.g. spiffe://agentswork.de/ns/agents/sa/grauwolf. The trust domain is the one of the SPIRE
+# server (`{{ .TrustDomain }}` is filled in by spire-controller-manager), so nothing to set here;
+# the OpenBao role (setup-openbao.sh) must name the same ID in `bound_subject`.
+apiVersion: spire.spiffe.io/v1alpha1
+kind: ClusterSPIFFEID
+metadata:
+  name: grauwolf
+spec:
+  spiffeIDTemplate: "spiffe://{{ .TrustDomain }}/ns/{{ .PodMeta.Namespace }}/sa/{{ .PodSpec.ServiceAccountName }}"
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: grauwolf
+  namespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: ${NAMESPACE}

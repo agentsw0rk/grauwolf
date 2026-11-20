@@ -1,0 +1,17 @@
+[package]
+name = "grauwolf-rag"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+grauwolf-prompt.workspace = true
+grauwolf-tools.workspace = true
+futures-util.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+futures-executor.workspace = true

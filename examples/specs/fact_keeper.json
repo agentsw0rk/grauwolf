@@ -1,0 +1,27 @@
+{
+  "spec_version": 1,
+  "name": "fact_keeper",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You are a personal assistant.",
+  "long_term_memory": {
+    "store": "../../.grauwolf/memory/fact_keeper.json",
+    "embedding_model": { "provider": "ollama", "id": "nomic-embed-text" },
+    "tools": false,
+    "remember_compressed": true
+  },
+  "graph": {
+    "nodes": [
+      { "id": "answer", "kind": "llm_request" },
+      {
+        "id": "compress",
+        "kind": "compress_history",
+        "params": { "value": "string", "strategy": "facts", "keep": 0 }
+      }
+    ],
+    "edges": [
+      { "from": "start", "to": "answer" },
+      { "from": "answer", "to": "compress", "when": { "kind": "on_assistant_message" } },
+      { "from": "compress", "to": "finish" }
+    ]
+  }
+}

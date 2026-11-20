@@ -1,0 +1,105 @@
+{
+  "spec_version": 1,
+  "name": "ticket_router_sampling",
+  "model": {
+    "provider": "ollama",
+    "id": "qwen3.5:9b"
+  },
+  "system_prompt": "You are a support agent. Answer briefly and politely.",
+  "input": "string",
+  "output": "string",
+  "graph": {
+    "nodes": [
+      {
+        "id": "route",
+        "kind": "decide",
+        "params": {
+          "value": "string",
+          "kind": "choice",
+          "question": "Which team should handle this support ticket?",
+          "options": [
+            {
+              "name": "billing",
+              "description": "Invoices, payments, refunds and prices"
+            },
+            {
+              "name": "technical",
+              "description": "Errors, crashes and how to use the product"
+            },
+            {
+              "name": "other",
+              "description": "Everything else, e.g. feedback or press requests"
+            }
+          ],
+          "temperature": 0,
+          "think": false
+        }
+      },
+      {
+        "id": "reply",
+        "kind": "llm_request"
+      },
+      {
+        "id": "diagnose",
+        "kind": "llm_reason",
+        "params": {
+          "value": "string",
+          "prompt": "Diagnose the technical problem in the ticket and suggest one fix."
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "to": "route"
+      },
+      {
+        "from": "route",
+        "to": "reply",
+        "when": {
+          "kind": "on_decision",
+          "params": {
+            "answers": [
+              "billing"
+            ]
+          }
+        }
+      },
+      {
+        "from": "route",
+        "to": "diagnose",
+        "when": {
+          "kind": "on_decision",
+          "params": {
+            "answers": [
+              "technical"
+            ]
+          }
+        }
+      },
+      {
+        "from": "route",
+        "to": "finish",
+        "when": {
+          "kind": "on_decision",
+          "params": {
+            "answers": [
+              "other"
+            ]
+          }
+        }
+      },
+      {
+        "from": "reply",
+        "to": "finish",
+        "when": {
+          "kind": "on_assistant_message"
+        }
+      },
+      {
+        "from": "diagnose",
+        "to": "finish"
+      }
+    ]
+  }
+}

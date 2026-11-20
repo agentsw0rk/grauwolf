@@ -1,0 +1,17 @@
+{
+  "spec_version": 1,
+  "name": "docs_helper",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You answer questions about the product documentation. Use the excerpts that come with the question and name the source. If the excerpts do not cover it, say so.",
+  "knowledge": {
+    "sources": ["07-knowledge"],
+    "urls": ["https://docs.example.com/guide/getting-started.html", "https://docs.example.com/faq.md"],
+    "embedding_model": { "provider": "ollama", "id": "nomic-embed-text" },
+    "min_similarity": 0.5,
+    "inject": true,
+    "tool_enabled": false,
+    "top_k": 3,
+    "index": "../../../.grauwolf/knowledge/docs-helper.json"
+  },
+  "strategy": { "kind": "single_run" }
+}

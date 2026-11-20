@@ -1,0 +1,29 @@
+{
+  "spec_version": 1,
+  "name": "ticket",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You turn bug reports from users into a ticket.",
+  "types": {
+    "Ticket": {
+      "type": "object",
+      "description": "A ticket created from a bug report.",
+      "properties": {
+        "title": { "type": "string", "description": "Short summary." },
+        "priority": { "type": "integer", "description": "1 (highest) to 4." },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "effort": { "type": "number", "description": "Estimated effort in hours." }
+      },
+      "required": ["title", "priority", "tags"]
+    }
+  },
+  "output": "Ticket",
+  "graph": {
+    "nodes": [
+      { "id": "capture", "kind": "llm_request_structured", "params": { "type": "Ticket", "retries": 1 } }
+    ],
+    "edges": [
+      { "from": "start", "to": "capture" },
+      { "from": "capture", "to": "finish" }
+    ]
+  }
+}

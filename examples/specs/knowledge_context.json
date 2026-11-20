@@ -1,0 +1,14 @@
+{
+  "spec_version": 1,
+  "name": "knowledge_context",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Answer from the knowledge base excerpts that come with the question.",
+  "knowledge": {
+    "sources": ["../../README.md"],
+    "embedding_model": { "provider": "ollama", "id": "nomic-embed-text" },
+    "inject": true,
+    "tool_enabled": false,
+    "min_similarity": 0.4
+  },
+  "strategy": { "kind": "single_run" }
+}

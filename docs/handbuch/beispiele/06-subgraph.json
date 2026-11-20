@@ -1,0 +1,80 @@
+{
+  "spec_version": 1,
+  "name": "text_analysis",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du analysierst Texte. Zum Zählen nutzt du immer die Tools.",
+  "tools": [
+    {
+      "name": "count_words",
+      "description": "Zählt die Wörter eines Textes",
+      "args": {
+        "type": "object",
+        "properties": { "text": { "type": "string" } },
+        "required": ["text"]
+      },
+      "code": "let text = args[\"text\"].as_str().ok_or(\"text is missing\")?;\nOk(text.split_whitespace().count().to_string())"
+    },
+    {
+      "name": "count_sentences",
+      "description": "Zählt die Sätze eines Textes (Punkt, Fragezeichen oder Ausrufezeichen)",
+      "args": {
+        "type": "object",
+        "properties": { "text": { "type": "string" } },
+        "required": ["text"]
+      },
+      "code": "let text = args[\"text\"].as_str().ok_or(\"text is missing\")?;\nOk(text.chars().filter(|c| matches!(c, '.' | '!' | '?')).count().to_string())"
+    }
+  ],
+  "subgraphs": {
+    "count": {
+      "tools": ["count_words", "count_sentences"],
+      "graph": {
+        "nodes": [
+          { "id": "call_llm", "kind": "llm_request" },
+          { "id": "execute_tool", "kind": "execute_tool" },
+          { "id": "send_result", "kind": "llm_send_tool_result" },
+          { "id": "execute_tools_in_order", "kind": "execute_multiple_tools", "params": { "sequential": true } },
+          { "id": "send_results", "kind": "llm_send_multiple_tool_results" }
+        ],
+        "edges": [
+          { "from": "start", "to": "call_llm" },
+          { "from": "call_llm", "to": "execute_tool", "when": { "kind": "on_tool_call" } },
+          { "from": "call_llm", "to": "execute_tools_in_order", "when": { "kind": "on_multiple_tool_calls" } },
+          { "from": "call_llm", "to": "finish", "when": { "kind": "on_assistant_message" } },
+          { "from": "execute_tool", "to": "send_result" },
+          { "from": "send_result", "to": "execute_tool", "when": { "kind": "on_tool_call" } },
+          { "from": "send_result", "to": "execute_tools_in_order", "when": { "kind": "on_multiple_tool_calls" } },
+          { "from": "send_result", "to": "finish", "when": { "kind": "on_assistant_message" } },
+          { "from": "execute_tools_in_order", "to": "send_results" },
+          { "from": "send_results", "to": "execute_tool", "when": { "kind": "on_tool_call" } },
+          { "from": "send_results", "to": "execute_tools_in_order", "when": { "kind": "on_multiple_tool_calls" } },
+          { "from": "send_results", "to": "finish", "when": { "kind": "on_assistant_message" } }
+        ]
+      }
+    },
+    "assess": {
+      "tools": [],
+      "model": { "provider": "anthropic", "id": "claude-haiku-5-5" },
+      "graph": {
+        "nodes": [
+          { "id": "verdict", "kind": "llm_reason", "params": { "value": "string", "prompt": "Beurteile anhand der Zahlen in zwei Sätzen die Lesbarkeit des Textes." } }
+        ],
+        "edges": [
+          { "from": "start", "to": "verdict" },
+          { "from": "verdict", "to": "finish" }
+        ]
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      { "id": "count", "kind": "subgraph", "params": { "subgraph": "count" } },
+      { "id": "assess", "kind": "subgraph", "params": { "subgraph": "assess" } }
+    ],
+    "edges": [
+      { "from": "start", "to": "count" },
+      { "from": "count", "to": "assess" },
+      { "from": "assess", "to": "finish" }
+    ]
+  }
+}

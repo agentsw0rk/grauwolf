@@ -1,0 +1,20 @@
+{
+  "spec_version": 1,
+  "name": "text_tools",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du hilfst bei Texten. Nutze die Tools, statt selbst zu zählen oder zu rechnen.",
+  "tool_files": ["03-werkzeuge/zaehle_woerter.tool.json"],
+  "tools": [
+    {
+      "name": "add",
+      "description": "Addiert zwei Zahlen a und b",
+      "args": {
+        "type": "object",
+        "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+        "required": ["a", "b"]
+      },
+      "code_file": "03-werkzeuge/addiere.rs"
+    }
+  ],
+  "strategy": { "kind": "single_run" }
+}

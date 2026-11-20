@@ -1,0 +1,6 @@
+grauwolf
+
+crates/support/grauwolf-codegen is a fork of codegen 0.3.0
+(https://crates.io/crates/codegen, https://gitlab.com/yovoslav/codegen),
+Copyright (c) 2018 Carl Lerche, licensed under the MIT License
+(see crates/support/grauwolf-codegen/LICENSE-MIT).

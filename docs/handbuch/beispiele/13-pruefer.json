@@ -1,0 +1,12 @@
+{
+  "spec_version": 1,
+  "name": "reviewer",
+  "model": {
+    "provider": "ollama",
+    "id": "qwen3.5:9b"
+  },
+  "system_prompt": "Du prüfst kurze Texte. Nenne die zwei wichtigsten Probleme und eine Sache, die gut gelungen ist.",
+  "strategy": {
+    "kind": "single_run"
+  }
+}

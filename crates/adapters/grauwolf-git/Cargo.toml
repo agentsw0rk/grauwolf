@@ -1,0 +1,32 @@
+[package]
+name = "grauwolf-git"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+# A smart-HTTP git server over a repository on disk (upload-pack only) for tests of this and
+# other crates.
+test-git-server = ["dep:axum", "dep:base64", "dep:tokio", "dep:tokio-rustls", "dep:serde_json", "grauwolf-spiffe/testing"]
+
+[dependencies]
+axum = { workspace = true, optional = true }
+base64 = { workspace = true, optional = true }
+git2.workspace = true
+grauwolf-spiffe.workspace = true
+reqwest = { workspace = true, features = ["blocking"] }
+ssh-key.workspace = true
+tokio = { workspace = true, features = ["net", "rt", "time", "sync"], optional = true }
+tokio-rustls = { version = "0.26", default-features = false, features = ["aws_lc_rs"], optional = true }
+serde_json = { workspace = true, optional = true }
+
+[[example]]
+name = "serve_folder"
+required-features = ["test-git-server"]
+
+[dev-dependencies]
+grauwolf-config.workspace = true
+grauwolf-test.workspace = true
+grauwolf-git = { path = ".", features = ["test-git-server"] }
+tokio = { workspace = true, features = ["signal"] }

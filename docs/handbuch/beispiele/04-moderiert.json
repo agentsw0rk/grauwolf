@@ -1,0 +1,7 @@
+{
+  "spec_version": 1,
+  "name": "moderated_helper",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist ein freundlicher Assistent. Antworte kurz und auf Deutsch.",
+  "strategy": { "kind": "single_run", "params": { "moderate": true } }
+}

@@ -1,0 +1,24 @@
+{
+  "spec_version": 1,
+  "name": "verified_calculator",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist ein Rechenassistent. Nutze für jede Addition das Tool add und antworte auf Deutsch.",
+  "tools": [
+    {
+      "name": "add",
+      "description": "Addiert zwei Zahlen a und b",
+      "args": {
+        "type": "object",
+        "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+        "required": ["a", "b"]
+      },
+      "code_file": "03-werkzeuge/addiere.rs"
+    }
+  ],
+  "strategy": {
+    "kind": "verified",
+    "params": {
+      "verify_prompt": "Prüfe, ob jede Zahl in der Antwort stimmt und ob die Frage vollständig beantwortet ist. Setze correct auf true oder false und beschreibe im Feedback, was falsch ist."
+    }
+  }
+}

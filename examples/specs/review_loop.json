@@ -1,0 +1,61 @@
+{
+  "spec_version": 1,
+  "name": "review_loop",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You confirm that a text was saved. Answer with the single word Saved.",
+  "agent_tools": {
+    "draft_writer": { "spec": "draft_writer.json", "description": "Writes or revises a short text" },
+    "draft_reviewer": { "spec": "draft_reviewer.json", "description": "Answers APPROVED or REJECTED with remarks" }
+  },
+  "subgraphs": {
+    "save": { "graph": {
+      "nodes": [ { "id": "save", "kind": "llm_request" } ],
+      "edges": [ { "from": "start", "to": "save" },
+                 { "from": "save", "to": "finish", "when": { "kind": "on_assistant_message" } } ] } }
+  },
+  "graph": {
+    "nodes": [
+      { "id": "editor", "kind": "goap", "params": {
+        "state": {
+          "topic": "", "draft": "", "feedback": "",
+          "written": false, "reviewed": false, "approved": false, "saved": false,
+          "review_attempts": 0
+        },
+        "input_fact": "topic",
+        "output_fact": "draft",
+        "actions": [
+          { "name": "write", "agent": "draft_writer",
+            "input": "Write a short text with a title about: {{topic}}",
+            "output_fact": "draft",
+            "pre": { "written": false },
+            "effects": { "written": true, "reviewed": false } },
+          { "name": "review", "agent": "draft_reviewer",
+            "input": "Review this text:\n{{draft}}",
+            "output_fact": "feedback",
+            "pre": { "written": true, "reviewed": false },
+            "effects": { "reviewed": true, "approved": true },
+            "success_contains": "APPROVED",
+            "on_failure": { "reviewed": true, "review_attempts": { "add": 1 } } },
+          { "name": "fix", "agent": "draft_writer",
+            "input": "Revise the text according to the remarks.\n\nText:\n{{draft}}\n\nRemarks:\n{{feedback}}",
+            "output_fact": "draft",
+            "pre": { "reviewed": true, "approved": false, "review_attempts": { "lt": 3 } },
+            "effects": { "reviewed": false } },
+          { "name": "save", "subgraph": "save",
+            "input": "The text was approved:\n{{draft}}",
+            "pre": { "approved": true },
+            "effects": { "saved": true } }
+        ],
+        "goals": [
+          { "name": "saved", "facts": { "saved": true }, "priority": 1 },
+          { "name": "give_up", "facts": { "reviewed": true, "review_attempts": { "ge": 3 } } }
+        ],
+        "max_iterations": 12
+      } }
+    ],
+    "edges": [
+      { "from": "start", "to": "editor" },
+      { "from": "editor", "to": "finish" }
+    ]
+  }
+}

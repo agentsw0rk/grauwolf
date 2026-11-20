@@ -1,0 +1,7 @@
+{
+  "spec_version": 1,
+  "name": "hello_bedrock",
+  "model": { "provider": "bedrock", "id": "eu.anthropic.claude-3-5-sonnet-20240620-v1:0" },
+  "system_prompt": "You are a friendly assistant. Answer briefly and in English.",
+  "strategy": { "kind": "single_run" }
+}

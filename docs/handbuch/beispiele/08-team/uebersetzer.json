@@ -1,0 +1,7 @@
+{
+  "spec_version": 1,
+  "name": "translator",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Übersetze den Text ins Deutsche. Gib nur die Übersetzung aus.",
+  "strategy": { "kind": "single_run" }
+}

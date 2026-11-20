@@ -1,0 +1,19 @@
+{
+  "spec_version": 1,
+  "name": "calculator",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist ein Rechenassistent. Nutze für jede Multiplikation das Tool multiply und antworte auf Deutsch.",
+  "tools": [
+    {
+      "name": "multiply",
+      "description": "Multipliziert zwei Zahlen a und b",
+      "args": {
+        "type": "object",
+        "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+        "required": ["a", "b"]
+      },
+      "code": "let a = args[\"a\"].as_f64().ok_or(\"a is missing\")?;\nlet b = args[\"b\"].as_f64().ok_or(\"b is missing\")?;\nOk((a * b).to_string())"
+    }
+  ],
+  "strategy": { "kind": "single_run" }
+}

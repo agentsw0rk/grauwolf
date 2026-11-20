@@ -1,0 +1,25 @@
+{
+  "spec_version": 1,
+  "name": "relay",
+  "model": { "provider": "ollama", "id": "llama3.2" },
+  "types": {
+    "Ticket": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "priority": { "type": "integer" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "estimate": { "type": "number" },
+        "urgent": { "type": "boolean" }
+      },
+      "required": ["title", "priority", "tags"]
+    }
+  },
+  "input": "Ticket",
+  "output": "Ticket",
+  "graph": {
+    "edges": [
+      { "from": "start", "to": "finish" }
+    ]
+  }
+}

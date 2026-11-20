@@ -1,0 +1,33 @@
+---
+source: crates/domain/grauwolf-generator/tests/generate.rs
+expression: "generated.files[&PathBuf::from(\"tools/tools.json\")]"
+---
+{
+  "format": 1,
+  "tools": [
+    {
+      "name": "code_main_score",
+      "kind": "code",
+      "module": "tools/code_main_score.wasm",
+      "sha256": "sha256:code_main_score"
+    },
+    {
+      "name": "condition_main_score_finish",
+      "kind": "condition",
+      "module": "tools/condition_main_score_finish.wasm",
+      "sha256": "sha256:condition_main_score_finish"
+    },
+    {
+      "name": "transform_main_score_finish",
+      "kind": "transform",
+      "module": "tools/transform_main_score_finish.wasm",
+      "sha256": "sha256:transform_main_score_finish"
+    },
+    {
+      "name": "transform_main_score_finish_2",
+      "kind": "transform",
+      "module": "tools/transform_main_score_finish_2.wasm",
+      "sha256": "sha256:transform_main_score_finish_2"
+    }
+  ]
+}

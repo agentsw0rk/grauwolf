@@ -1,0 +1,14 @@
+{
+  "spec_version": 1,
+  "name": "pack_user",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You calculate. Use the tools of the package for every calculation.",
+  "tool_packages": [
+    {
+      "oci": "ghcr.io/example/grauwolf-tools/math:1.0",
+      "tools": ["add", "multiply"],
+      "as": { "multiply": "times" }
+    }
+  ],
+  "strategy": { "kind": "single_run" }
+}

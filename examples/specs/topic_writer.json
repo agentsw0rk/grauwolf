@@ -1,0 +1,15 @@
+{
+  "spec_version": 1,
+  "name": "topic_writer",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You write short texts. Write two sentences about the topic you are given.",
+  "graph": {
+    "nodes": [
+      { "id": "call_llm", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "call_llm" },
+      { "from": "call_llm", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

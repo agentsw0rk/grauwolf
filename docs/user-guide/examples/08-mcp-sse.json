@@ -1,0 +1,14 @@
+{
+  "spec_version": 1,
+  "name": "text_reverser",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Reverse texts with the reverse tool and answer with the result only.",
+  "mcp_servers": {
+    "legacy": {
+      "url": "http://127.0.0.1:8931/sse",
+      "transport": "sse",
+      "tools": ["reverse"]
+    }
+  },
+  "strategy": { "kind": "single_run" }
+}

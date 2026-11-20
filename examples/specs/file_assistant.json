@@ -1,0 +1,11 @@
+{
+  "spec_version": 1,
+  "name": "file_assistant",
+  "model": { "provider": "ollama", "id": "llama3.2" },
+  "system_prompt": "You help with files in the working folder. Look before you answer; ask when something is unclear.",
+  "builtin_tools": {
+    "tools": ["list_directory", "read_file", "search_files", "write_file", "edit_file", "ask_user"],
+    "root": "../workspace"
+  },
+  "strategy": { "kind": "single_run" }
+}

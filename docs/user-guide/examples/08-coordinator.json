@@ -1,0 +1,17 @@
+{
+  "spec_version": 1,
+  "name": "coordinator",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You coordinate requests to customer service. You pass bug reports on to create_ticket and translations into German to translator. Afterwards, briefly summarize the results for the user.",
+  "agent_tools": {
+    "translator": {
+      "spec": "08-team/translator.json",
+      "description": "Translates an English text into German"
+    },
+    "create_ticket": {
+      "spec": "08-team/create_ticket.json",
+      "description": "Turns a bug report into a ticket with title, priority and tags"
+    }
+  },
+  "strategy": { "kind": "single_run" }
+}

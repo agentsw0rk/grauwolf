@@ -1,0 +1,15 @@
+{
+  "spec_version": 1,
+  "name": "researcher",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You pick topics. Reply with a JSON array of exactly three short topic names for the request and nothing else, for example [\"first\", \"second\", \"third\"].",
+  "graph": {
+    "nodes": [
+      { "id": "call_llm", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "call_llm" },
+      { "from": "call_llm", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "spec_version": 1,
+  "name": "researcher",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du recherchierst Webseiten. Rufe die Seite ab, denke darüber nach, was sie sagt, führe eine Aufgabenliste für das Offene und halte die Ergebnisse mit store_value fest. Antworte auf Deutsch.",
+  "builtin_tools": {
+    "tools": [
+      "think", "fetch",
+      "store_value", "retrieve_value", "list_keys",
+      "add_task", "complete_task", "remove_task", "list_tasks"
+    ],
+    "root": "03-werkzeuge/arbeitsordner",
+    "fetch": { "allowed_hosts": ["example.com", "*.wikipedia.org"] }
+  },
+  "strategy": { "kind": "react" }
+}

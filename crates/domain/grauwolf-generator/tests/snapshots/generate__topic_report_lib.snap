@@ -1,0 +1,244 @@
+---
+source: crates/domain/grauwolf-generator/tests/generate.rs
+expression: source
+---
+//! Generated from the AgentSpec `topic_report` – do not edit by hand.
+
+use std::sync::Arc;
+use grauwolf_agents::AgentContext;
+use grauwolf_graph::{GraphError, TypedGraph};
+use grauwolf_llm::PromptExecutor;
+use grauwolf_prompt::{LlModel, Prompt};
+use grauwolf_tools::{DynTool, ToolRegistry};
+use grauwolf_agents::run_handles::RunHandles;
+use grauwolf_agents::events::Feature;
+/// Strategy graph of the agent.
+pub fn graph() -> Result<TypedGraph<AgentContext, String, String>, GraphError> {
+    let each_write_all = grauwolf_agents::for_each::ForEach::new(
+            grauwolf_agents::for_each::Body::Agent("writer".to_owned()),
+        )
+        .with_max_parallel(2)
+        .with_on_error(grauwolf_agents::for_each::OnError::Skip)
+        .with_text_output();
+    TypedGraph::build(|g| {
+        let node_research = g
+            .node(
+                "research",
+                grauwolf_agents::nodes::agent_step::<String, String>("researcher"),
+            );
+        let node_write_all = g
+            .node(
+                "write_all",
+                grauwolf_agents::for_each::for_each::<
+                    String,
+                    String,
+                >(each_write_all, "write_all"),
+            );
+        let node_summarize = g
+            .node(
+                "summarize",
+                grauwolf_agents::nodes::agent_step::<String, String>("summarizer"),
+            );
+        let node_check = g
+            .node(
+                "check",
+                grauwolf_agents::nodes::decide::<
+                    String,
+                >(
+                    "check",
+                    "{\"kind\":\"yes_no\",\"no\":\"Empty, broken or not a summary\",\"question\":\"Is this a coherent summary of several short articles?\",\"value\":\"string\",\"yes\":\"A readable paragraph that sums up the articles\"}",
+                ),
+            );
+        let node_retry = g
+            .node(
+                "retry",
+                grauwolf_agents::nodes::agent_step::<String, String>("summarizer"),
+            );
+        g.edge(&g.start(), &node_research);
+        g.edge(&node_research, &node_write_all);
+        g.edge(&node_write_all, &node_summarize);
+        g.edge(&node_summarize, &node_check);
+        g.edge_when(
+            &node_check,
+            &g.finish(),
+            |ctx, value| grauwolf_agents::conditions::on_decision(ctx, &["yes"], value),
+        );
+        g.edge_when(
+            &node_check,
+            &node_retry,
+            |ctx, value| grauwolf_agents::conditions::on_decision(ctx, &["no"], value),
+        );
+        g.edge(&node_retry, &g.finish());
+    })
+}
+/// Model from the spec.
+pub fn model() -> LlModel {
+    LlModel::new("ollama", "qwen3.5:9b")
+}
+/// Initial prompt from the spec.
+pub fn prompt() -> Prompt {
+    Prompt::builder("topic_report").build()
+}
+/// Tools that must be provided from outside (MCP, knowledge, sub-agents, built-in tools).
+pub const EXTERNAL_TOOLS: &[&str] = &["researcher", "summarizer", "writer"];
+/// Runs the agent with `input` in a fresh context.
+pub async fn run(
+    executor: Arc<PromptExecutor>,
+    input: String,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    run_with_tools(executor, input, Vec::new()).await
+}
+/// Like [`run`]; `external` must contain all [`EXTERNAL_TOOLS`].
+pub async fn run_with_tools(
+    executor: Arc<PromptExecutor>,
+    input: String,
+    external: Vec<Arc<dyn DynTool>>,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    run_observed(executor, input, external, Vec::new()).await
+}
+/// Like [`run`]; `features` see all events of the run, in the same order as with the interpreter (ADR-0084).
+pub async fn run_observed(
+    executor: Arc<PromptExecutor>,
+    input: String,
+    external: Vec<Arc<dyn DynTool>>,
+    features: Vec<Arc<dyn Feature>>,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    run_handled(executor, Some(input), external, features, RunHandles::default()).await
+}
+/// The core of all entry points: like [`run_observed`], with the handles of the caller – prices, a budget of its own, an approver for tools that need approval, a frame sink, a conversation, attachments and checkpoints; with `handles.resume` the run continues from its checkpoint and `input` is `None` (ADR-0119).
+pub async fn run_handled(
+    executor: Arc<PromptExecutor>,
+    input: Option<String>,
+    external: Vec<Arc<dyn DynTool>>,
+    features: Vec<Arc<dyn Feature>>,
+    handles: RunHandles,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    let state = handles.resume_state().await?;
+    let mut ctx = handles
+        .context(
+            executor,
+            model(),
+            prompt(),
+            state.as_ref(),
+            grauwolf_agents::Budget::default(),
+            &[],
+        )?
+        .with_tools(tools(external)?);
+    for feature in features {
+        ctx = ctx.install(feature);
+    }
+    let run = handles.start(input.as_ref(), state.as_ref())?;
+    let graph = graph()?;
+    Ok(RunHandles::run_graph(run, &mut ctx, graph, input, state).await?)
+}
+/// The spec of this crate as JSON (for `run_app`, ADR-0084).
+pub const SPEC_JSON: &str = "{\"spec_version\":1,\"name\":\"topic_report\",\"model\":{\"provider\":\"ollama\",\"id\":\"qwen3.5:9b\"},\"system_prompt\":null,\"types\":{},\"input\":\"string\",\"output\":\"string\",\"tools\":[],\"mcp_servers\":{},\"agent_tools\":{\"researcher\":{\"spec\":\"topic_researcher.json\",\"url\":null,\"headers\":{},\"description\":\"Picks three topics as a JSON list\"},\"summarizer\":{\"spec\":\"topic_summarizer.json\",\"url\":null,\"headers\":{},\"description\":\"Summarizes a JSON list of articles\"},\"writer\":{\"spec\":\"topic_writer.json\",\"url\":null,\"headers\":{},\"description\":\"Writes two sentences about one topic\"}},\"builtin_tools\":null,\"knowledge\":null,\"long_term_memory\":null,\"tools_dir\":null,\"limits\":null,\"self_tools\":null,\"subgraphs\":{},\"strategy\":null,\"graph\":{\"nodes\":[{\"id\":\"research\",\"kind\":\"agent\",\"params\":{\"agent\":\"researcher\"}},{\"id\":\"write_all\",\"kind\":\"for_each\",\"params\":{\"body\":{\"agent\":\"writer\"},\"input\":\"string\",\"max_parallel\":2,\"on_error\":\"skip\",\"output\":\"string\"}},{\"id\":\"summarize\",\"kind\":\"agent\",\"params\":{\"agent\":\"summarizer\"}},{\"id\":\"check\",\"kind\":\"decide\",\"params\":{\"kind\":\"yes_no\",\"no\":\"Empty, broken or not a summary\",\"question\":\"Is this a coherent summary of several short articles?\",\"value\":\"string\",\"yes\":\"A readable paragraph that sums up the articles\"}},{\"id\":\"retry\",\"kind\":\"agent\",\"params\":{\"agent\":\"summarizer\"}}],\"edges\":[{\"from\":\"start\",\"to\":\"research\",\"when\":null},{\"from\":\"research\",\"to\":\"write_all\",\"when\":null},{\"from\":\"write_all\",\"to\":\"summarize\",\"when\":null},{\"from\":\"summarize\",\"to\":\"check\",\"when\":null},{\"from\":\"check\",\"to\":\"finish\",\"when\":{\"kind\":\"on_decision\",\"params\":{\"answers\":[\"yes\"]}}},{\"from\":\"check\",\"to\":\"retry\",\"when\":{\"kind\":\"on_decision\",\"params\":{\"answers\":[\"no\"]}}},{\"from\":\"retry\",\"to\":\"finish\",\"when\":null}]}}";
+/// Provisions the agent once: providers, external tools, sub-agents and long-term memory with paths relative to `base_dir`, configuration from `options` (feature `app`, ADR-0114).
+#[cfg(feature = "app")]
+pub async fn provision(
+    base_dir: &std::path::Path,
+    options: grauwolf::provisioning::ProvisionOptions,
+) -> Result<
+    grauwolf::provisioning::ProvisionedAgent,
+    Box<dyn std::error::Error + Send + Sync>,
+> {
+    use grauwolf::spec::AgentSpecExt as _;
+    let spec = grauwolf::spec::AgentSpec::from_json(SPEC_JSON)?;
+    let options = options
+        .clone()
+        .with_sub_agents(
+            Arc::new(
+                grauwolf::loader::AgentLoader::for_provisioning(
+                    grauwolf::toolbuild::ToolBuilder::new(
+                        base_dir.join(".grauwolf/tools"),
+                    ),
+                    &options,
+                ),
+            ),
+        );
+    Ok(grauwolf::provisioning::ProvisionedAgent::new(&spec, base_dir, options).await?)
+}
+#[cfg(feature = "app")]
+async fn run_with_options(
+    provisioned: &grauwolf::provisioning::ProvisionedAgent,
+    input: Option<String>,
+    options: grauwolf::app::RunOptions,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    let external = provisioned.tools_for(options.user.as_deref())?;
+    run_handled(
+            provisioned.executor(),
+            input,
+            external,
+            options.features.clone(),
+            options.handles(provisioned.prices()),
+        )
+        .await
+}
+/// Runs the provisioned agent for `options.user` (the area in long-term memory and the key-value store); `options.features` see all events. The other options bring what a caller of the interpreter has: a budget, a conversation, attachments, an approver, a frame sink and checkpoints (feature `app`, ADR-0119).
+#[cfg(feature = "app")]
+pub async fn run_provisioned(
+    provisioned: &grauwolf::provisioning::ProvisionedAgent,
+    input: String,
+    options: grauwolf::app::RunOptions,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    run_with_options(provisioned, Some(input), options).await
+}
+/// Continues the run `run_id` from its last checkpoint in `store`; work before it is not repeated, and the input is the one of the checkpoint (feature `app`, ADR-0119).
+#[cfg(feature = "app")]
+pub async fn resume_provisioned(
+    provisioned: &grauwolf::provisioning::ProvisionedAgent,
+    store: Arc<dyn grauwolf_agents::checkpoints::CheckpointStore>,
+    run_id: &str,
+    options: grauwolf::app::RunOptions,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    run_with_options(provisioned, None, options.resuming(store, run_id)).await
+}
+/// Runs the agent like `grauwolf spec run`: providers from the process environment, external tools, sub-agents and long-term memory (shared area) with paths relative to `base_dir` (feature `app`).
+#[cfg(feature = "app")]
+pub async fn run_app(
+    base_dir: &std::path::Path,
+    input: String,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    run_app_with(
+            base_dir,
+            input,
+            grauwolf::provisioning::ProvisionOptions::new(
+                Arc::new(grauwolf::config::ProcessEnv),
+            ),
+            grauwolf::app::RunOptions::default(),
+        )
+        .await
+}
+/// Like [`run_app`], with the options of the agent (`provision`) and of the run (`run_provisioned`): provisions the agent and runs it once (feature `app`). A service provisions once and runs many times instead.
+#[cfg(feature = "app")]
+pub async fn run_app_with(
+    base_dir: &std::path::Path,
+    input: String,
+    provision_options: grauwolf::provisioning::ProvisionOptions,
+    options: grauwolf::app::RunOptions,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    let provisioned = provision(base_dir, provision_options).await?;
+    run_provisioned(&provisioned, input, options).await
+}
+/// Tools of the spec (code in the sandbox) and the external tools from `external`.
+pub fn tools(
+    external: Vec<Arc<dyn DynTool>>,
+) -> Result<ToolRegistry, Box<dyn std::error::Error + Send + Sync>> {
+    if let Some(missing) = EXTERNAL_TOOLS
+        .iter()
+        .find(|name| !external.iter().any(|tool| tool.name() == **name))
+    {
+        return Err(
+            format!(
+                "tool '{missing}' was not provided (MCP server, knowledge, sub-agent or built-in tool)"
+            )
+                .into(),
+        );
+    }
+    let registry = ToolRegistry::builder();
+    let registry = external
+        .into_iter()
+        .filter(|tool| EXTERNAL_TOOLS.contains(&tool.name()))
+        .fold(registry, |registry, tool| registry.shared(tool));
+    Ok(registry.build())
+}

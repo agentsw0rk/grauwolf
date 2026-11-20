@@ -1,0 +1,27 @@
+{
+  "spec_version": 1,
+  "name": "create_ticket",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du machst aus Fehlermeldungen von Nutzern ein Ticket.",
+  "types": {
+    "Ticket": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Kurze Zusammenfassung." },
+        "priority": { "type": "integer", "description": "1 (höchste) bis 4." },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["title", "priority", "tags"]
+    }
+  },
+  "output": "Ticket",
+  "graph": {
+    "nodes": [
+      { "id": "capture", "kind": "llm_request_structured", "params": { "type": "Ticket", "retries": 1 } }
+    ],
+    "edges": [
+      { "from": "start", "to": "capture" },
+      { "from": "capture", "to": "finish" }
+    ]
+  }
+}

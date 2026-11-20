@@ -1,0 +1,7 @@
+{
+  "spec_version": 1,
+  "name": "hello_gemini",
+  "model": { "provider": "gemini", "id": "gemini-2.5-flash" },
+  "system_prompt": "You are a friendly assistant. Answer briefly and in English.",
+  "strategy": { "kind": "single_run" }
+}

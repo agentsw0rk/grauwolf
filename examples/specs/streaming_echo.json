@@ -1,0 +1,30 @@
+{
+  "spec_version": 1,
+  "name": "streaming_echo",
+  "model": {
+    "provider": "ollama",
+    "id": "llama3.2"
+  },
+  "system_prompt": "Repeat the user's message verbatim.",
+  "graph": {
+    "nodes": [
+      {
+        "id": "call_llm",
+        "kind": "llm_request_streaming"
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "to": "call_llm"
+      },
+      {
+        "from": "call_llm",
+        "to": "finish",
+        "when": {
+          "kind": "on_assistant_message"
+        }
+      }
+    ]
+  }
+}

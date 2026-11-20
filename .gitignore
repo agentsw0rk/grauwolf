@@ -1,0 +1,19 @@
+/target
+**/*.rs.bk
+# Local reference checkouts (not part of this project)
+/koog/
+# Default cache of `grauwolf spec build`
+/.grauwolf/
+
+# Local secrets (API keys)
+.env
+.kubeconfig
+
+# Local notes of the AI agents (roadmap), not part of the project
+/.claude/
+agentweaver
+# Output of scripts/build-macos.sh
+/dist/
+
+# macOS Finder metadata
+.DS_Store

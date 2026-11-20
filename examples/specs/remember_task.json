@@ -1,0 +1,21 @@
+{
+  "spec_version": 1,
+  "name": "remember_task",
+  "model": { "provider": "ollama", "id": "llama3.2" },
+  "system_prompt": "Collect your thoughts first. When the task is repeated, answer it concisely.",
+  "graph": {
+    "nodes": [
+      { "id": "keep", "kind": "store", "params": { "key": "task", "value": "string" } },
+      { "id": "think", "kind": "llm_request" },
+      { "id": "recall", "kind": "load", "params": { "key": "task", "value": "string", "type": "string" } },
+      { "id": "answer", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "keep" },
+      { "from": "keep", "to": "think" },
+      { "from": "think", "to": "recall", "when": { "kind": "on_assistant_message" } },
+      { "from": "recall", "to": "answer" },
+      { "from": "answer", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

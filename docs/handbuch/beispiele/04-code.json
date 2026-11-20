@@ -1,0 +1,61 @@
+{
+  "spec_version": 1,
+  "name": "review_router",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bekommst eine Kundenbewertung. Antworte mit genau einem kurzen Satz, der sagt, ob die Bewertung positiv oder negativ ist.",
+  "types": {
+    "Verdict": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "positive": { "type": "boolean" },
+        "words": { "type": "integer" }
+      },
+      "required": ["text", "positive", "words"]
+    },
+    "Reply": {
+      "type": "object",
+      "properties": {
+        "subject": { "type": "string" },
+        "body": { "type": "string" }
+      },
+      "required": ["subject", "body"]
+    }
+  },
+  "input": "string",
+  "output": "Reply",
+  "graph": {
+    "nodes": [
+      { "id": "judge", "kind": "llm_request" },
+      {
+        "id": "score",
+        "kind": "code",
+        "params": { "input": "string", "output": "Verdict", "code_file": "04-code/bewerten.rs" }
+      }
+    ],
+    "edges": [
+      { "from": "start", "to": "judge" },
+      { "from": "judge", "to": "score", "when": { "kind": "on_assistant_message" } },
+      {
+        "from": "score",
+        "to": "finish",
+        "when": {
+          "kind": "on_code",
+          "params": { "input": "Verdict", "code": "value.positive" }
+        },
+        "transform": {
+          "output": "Reply",
+          "code": "Reply { subject: \"Thank you for the praise\".to_owned(), body: value.text }"
+        }
+      },
+      {
+        "from": "score",
+        "to": "finish",
+        "transform": {
+          "output": "Reply",
+          "code": "Reply { subject: format!(\"We will look into it ({} words)\", value.words), body: value.text }"
+        }
+      }
+    ]
+  }
+}

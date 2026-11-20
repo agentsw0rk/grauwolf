@@ -1,0 +1,8 @@
+{
+  "spec_version": 1,
+  "name": "poet",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist ein hilfreicher Assistent. Prüfe deine Fähigkeiten, bevor du antwortest.",
+  "skills": [{ "dir": "03-skills" }],
+  "strategy": { "kind": "single_run" }
+}

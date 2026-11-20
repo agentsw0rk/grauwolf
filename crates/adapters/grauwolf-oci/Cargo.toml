@@ -1,0 +1,32 @@
+[package]
+name = "grauwolf-oci"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+# In-memory registry (distribution API v2 subset) for tests of this and other crates.
+test-registry = ["dep:axum", "tokio/net"]
+
+[dependencies]
+axum = { workspace = true, optional = true }
+base64.workspace = true
+grauwolf-spec.workspace = true
+p256.workspace = true
+rand_core.workspace = true
+reqwest = { workspace = true, features = ["query"] }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+
+[dev-dependencies]
+grauwolf-test.workspace = true
+grauwolf-oci = { path = ".", features = ["test-registry"] }
+tokio = { workspace = true, features = ["net"] }
+
+[[example]]
+name = "serve_empty_registry"
+required-features = ["test-registry"]

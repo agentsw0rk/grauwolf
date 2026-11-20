@@ -1,0 +1,95 @@
+{
+  "spec_version": 1,
+  "name": "perspectives",
+  "model": {
+    "provider": "ollama",
+    "id": "llama3.2"
+  },
+  "system_prompt": "You help with decisions. If several perspectives are available, weigh them and give a recommendation in two sentences.",
+  "subgraphs": {
+    "optimist": {
+      "graph": {
+        "nodes": [
+          {
+            "id": "view",
+            "kind": "llm_reason",
+            "params": {
+              "value": "string",
+              "prompt": "Answer from an optimistic perspective in two sentences."
+            }
+          }
+        ],
+        "edges": [
+          {
+            "from": "start",
+            "to": "view"
+          },
+          {
+            "from": "view",
+            "to": "finish"
+          }
+        ]
+      }
+    },
+    "pessimist": {
+      "graph": {
+        "nodes": [
+          {
+            "id": "view",
+            "kind": "llm_reason",
+            "params": {
+              "value": "string",
+              "prompt": "Answer from a pessimistic perspective in two sentences."
+            }
+          }
+        ],
+        "edges": [
+          {
+            "from": "start",
+            "to": "view"
+          },
+          {
+            "from": "view",
+            "to": "finish"
+          }
+        ]
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "views",
+        "kind": "parallel",
+        "params": {
+          "subgraphs": [
+            "optimist",
+            "pessimist"
+          ],
+          "merge": "concat"
+        }
+      },
+      {
+        "id": "weigh",
+        "kind": "llm_request"
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "to": "views"
+      },
+      {
+        "from": "views",
+        "to": "weigh"
+      },
+      {
+        "from": "weigh",
+        "to": "finish",
+        "when": {
+          "kind": "on_assistant_message"
+        }
+      }
+    ]
+  }
+}

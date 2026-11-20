@@ -1,0 +1,23 @@
+{
+  "spec_version": 1,
+  "name": "coordinator",
+  "model": {
+    "provider": "ollama",
+    "id": "qwen3.5:9b"
+  },
+  "system_prompt": "Du gibst Entwürfe an den reviewer weiter und fasst seine Prüfung in zwei Sätzen zusammen.",
+  "agent_tools": {
+    "reviewer": {
+      "url": "https://reviewer.reviewer.svc:8443",
+      "description": "Prüft einen kurzen Text und nennt seine Hauptprobleme",
+      "auth": {
+        "spiffe": {
+          "id": "spiffe://agentswork.de/ns/reviewer/sa/reviewer"
+        }
+      }
+    }
+  },
+  "strategy": {
+    "kind": "single_run"
+  }
+}

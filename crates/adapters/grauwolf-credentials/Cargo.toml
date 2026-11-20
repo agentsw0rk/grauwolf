@@ -1,0 +1,21 @@
+[package]
+name = "grauwolf-credentials"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+grauwolf-config.workspace = true
+grauwolf-openbao.workspace = true
+grauwolf-spiffe.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+tokio = { workspace = true, features = ["rt", "time"] }
+
+[dev-dependencies]
+grauwolf-spiffe = { workspace = true, features = ["testing"] }
+grauwolf-test.workspace = true
+tokio = { workspace = true, features = ["net"] }
+wiremock.workspace = true

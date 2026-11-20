@@ -1,0 +1,20 @@
+{
+  "spec_version": 1,
+  "name": "frugal_calculator",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist ein Rechner. Nutze für jede Rechnung das Tool.",
+  "tools": [
+    {
+      "name": "add",
+      "description": "Addiert zwei Zahlen",
+      "args": {
+        "type": "object",
+        "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+        "required": ["a", "b"]
+      },
+      "code_file": "03-werkzeuge/addiere.rs"
+    }
+  ],
+  "limits": { "max_steps": 20, "max_tool_calls": 5, "max_tokens": 20000 },
+  "strategy": { "kind": "single_run" }
+}

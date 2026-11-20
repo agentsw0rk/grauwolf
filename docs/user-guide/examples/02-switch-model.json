@@ -1,0 +1,23 @@
+{
+  "spec_version": 1,
+  "name": "local_then_claude",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "First you write a short draft in English. When you then get your draft back, you polish its language and output only the finished text.",
+  "graph": {
+    "nodes": [
+      { "id": "draft", "kind": "llm_request" },
+      {
+        "id": "switch",
+        "kind": "set_model",
+        "params": { "provider": "anthropic", "id": "claude-haiku-5-5", "value": "string" }
+      },
+      { "id": "polish", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "draft" },
+      { "from": "draft", "to": "switch", "when": { "kind": "on_assistant_message" } },
+      { "from": "switch", "to": "polish" },
+      { "from": "polish", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

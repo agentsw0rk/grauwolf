@@ -1,0 +1,17 @@
+[package]
+name = "grauwolf-sandbox"
+version.workspace = true
+edition.workspace = true
+# wasmtime 50 requires Rust 1.97; a current sandbox version is security-relevant (ADR-0011).
+rust-version = "1.97"
+license.workspace = true
+
+[dependencies]
+grauwolf-tools.workspace = true
+thiserror.workspace = true
+futures-util.workspace = true
+serde_json.workspace = true
+wasmtime = { version = "50", default-features = false, features = ["cranelift", "runtime", "std", "wat"] }
+
+[dev-dependencies]
+futures-executor.workspace = true

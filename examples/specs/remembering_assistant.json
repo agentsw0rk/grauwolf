@@ -1,0 +1,14 @@
+{
+  "spec_version": 1,
+  "name": "remembering_assistant",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You are a personal assistant.",
+  "long_term_memory": {
+    "store": "../../.grauwolf/memory/remembering_assistant.json",
+    "embedding_model": { "provider": "ollama", "id": "nomic-embed-text" },
+    "tools": false,
+    "auto_recall": true,
+    "auto_remember": true
+  },
+  "strategy": { "kind": "single_run" }
+}

@@ -1,0 +1,7 @@
+---
+source: crates/domain/grauwolf-generator/tests/generate.rs
+expression: "files[&PathBuf::from(\".dockerignore\")]"
+---
+target/
+Dockerfile
+.dockerignore

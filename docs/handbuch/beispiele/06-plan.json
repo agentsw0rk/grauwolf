@@ -1,0 +1,26 @@
+{
+  "spec_version": 1,
+  "name": "travel_planner",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du planst Reisen gründlich und arbeitest Aufgaben Schritt für Schritt ab.",
+  "subgraphs": {
+    "step": {
+      "graph": {
+        "nodes": [ { "id": "call_llm", "kind": "llm_request" } ],
+        "edges": [
+          { "from": "start", "to": "call_llm" },
+          { "from": "call_llm", "to": "finish", "when": { "kind": "on_assistant_message" } }
+        ]
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      { "id": "plan", "kind": "plan", "params": { "subgraph": "step", "critic": true, "max_iterations": 8 } }
+    ],
+    "edges": [
+      { "from": "start", "to": "plan" },
+      { "from": "plan", "to": "finish" }
+    ]
+  }
+}

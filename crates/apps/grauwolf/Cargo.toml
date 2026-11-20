@@ -1,0 +1,62 @@
+[package]
+name = "grauwolf"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+default = ["macros", "ollama", "openai", "anthropic", "gemini", "bedrock", "sandbox", "mcp", "builtin", "git", "fetch", "command", "atlassian", "sql", "pgvector", "otel", "a2a", "systemone", "service", "packages", "credentials"]
+ollama = ["dep:grauwolf-ollama", "grauwolf-host/ollama", "grauwolf-server/ollama"]
+openai = ["dep:grauwolf-openai", "grauwolf-host/openai"]
+anthropic = ["dep:grauwolf-anthropic", "grauwolf-host/anthropic"]
+gemini = ["dep:grauwolf-gemini", "grauwolf-host/gemini"]
+bedrock = ["dep:grauwolf-bedrock", "grauwolf-host/bedrock"]
+sandbox = ["dep:grauwolf-sandbox", "grauwolf-host/sandbox"]
+credentials = ["grauwolf-host/credentials"]
+packages = ["sandbox", "dep:grauwolf-toolpkg", "grauwolf-host/packages"]
+mcp = ["grauwolf-host/mcp"]
+builtin = ["grauwolf-host/builtin"]
+git = ["grauwolf-host/git"]
+fetch = ["grauwolf-host/fetch"]
+command = ["grauwolf-host/command"]
+atlassian = ["grauwolf-host/atlassian"]
+sql = ["grauwolf-host/sql", "grauwolf-server/sql"]
+pgvector = ["grauwolf-host/pgvector"]
+a2a = ["grauwolf-host/a2a"]
+systemone = ["grauwolf-host/systemone"]
+service = ["mcp", "grauwolf-server/service"]
+macros = ["dep:grauwolf-macros"]
+otel = ["grauwolf-host/otel", "grauwolf-server/otel"]
+
+[dependencies]
+grauwolf-agents.workspace = true
+grauwolf-builder-agent.workspace = true
+grauwolf-anthropic = { workspace = true, optional = true }
+grauwolf-gemini = { workspace = true, optional = true }
+grauwolf-bedrock = { workspace = true, optional = true }
+grauwolf-graph.workspace = true
+grauwolf-host.workspace = true
+grauwolf-interpreter.workspace = true
+grauwolf-llm.workspace = true
+grauwolf-macros = { workspace = true, optional = true }
+grauwolf-ollama = { workspace = true, optional = true }
+grauwolf-openai = { workspace = true, optional = true }
+grauwolf-prompt.workspace = true
+grauwolf-server.workspace = true
+grauwolf-rag.workspace = true
+grauwolf-sandbox = { workspace = true, optional = true }
+grauwolf-spec.workspace = true
+grauwolf-toolbuild.workspace = true
+grauwolf-toolpkg = { workspace = true, optional = true }
+grauwolf-tools.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true
+
+# Integration tests that need optional features: skipped in builds without them
+# (feature matrix of `cargo xtask check --full`, ADR-0108).
+[[test]]
+name = "macros"
+required-features = ["macros"]

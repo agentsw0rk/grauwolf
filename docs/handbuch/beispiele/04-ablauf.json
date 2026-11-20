@@ -1,0 +1,50 @@
+{
+  "spec_version": 1,
+  "name": "topic_flow",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "input": "string",
+  "output": "string",
+  "agent_tools": {
+    "researcher": { "spec": "04-ablauf/recherche.json", "description": "Wählt drei Themen als JSON-Liste aus" },
+    "writer": { "spec": "04-ablauf/schreiber.json", "description": "Schreibt zwei Sätze zu einem Thema" },
+    "summarizer": { "spec": "04-ablauf/zusammenfassung.json", "description": "Fasst eine JSON-Liste von Artikeln zusammen" }
+  },
+  "graph": {
+    "nodes": [
+      { "id": "research", "kind": "agent", "params": { "agent": "researcher" } },
+      {
+        "id": "write_all",
+        "kind": "for_each",
+        "params": {
+          "input": "string",
+          "output": "string",
+          "body": { "agent": "writer" },
+          "max_parallel": 2,
+          "on_error": "skip"
+        }
+      },
+      { "id": "summarize", "kind": "agent", "params": { "agent": "summarizer" } },
+      {
+        "id": "check",
+        "kind": "decide",
+        "params": {
+          "value": "string",
+          "kind": "yes_no",
+          "question": "Ist dies eine stimmige Zusammenfassung mehrerer kurzer Artikel?",
+          "yes": "Ein lesbarer Absatz, der die Artikel zusammenfasst",
+          "no": "Leer, kaputt oder keine Zusammenfassung"
+        }
+      },
+      { "id": "retry", "kind": "agent", "params": { "agent": "summarizer" } }
+    ],
+    "edges": [
+      { "from": "start", "to": "research" },
+      { "from": "research", "to": "write_all" },
+      { "from": "write_all", "to": "summarize" },
+      { "from": "summarize", "to": "check" },
+      { "from": "check", "to": "finish", "when": { "kind": "on_decision", "params": { "answers": ["yes"] } } },
+      { "from": "check", "to": "retry", "when": { "kind": "on_decision", "params": { "answers": ["no"] } } },
+      { "from": "retry", "to": "finish" }
+    ]
+  }
+}

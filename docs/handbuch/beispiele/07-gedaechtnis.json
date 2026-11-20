@@ -1,0 +1,12 @@
+{
+  "spec_version": 1,
+  "name": "assistant_with_memory",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist ein persönlicher Assistent mit Langzeitgedächtnis. Wenn der Nutzer dir etwas Dauerhaftes über sich erzählt (Name, Vorlieben, Pläne), speichere es mit remember als vollständigen Satz. Bevor du eine Frage zum Nutzer beantwortest, schlage sie mit recall nach. Antworte kurz.",
+  "long_term_memory": {
+    "store": "../../../.grauwolf/memory/assistant.json",
+    "embedding_model": { "provider": "ollama", "id": "nomic-embed-text" },
+    "top_k": 3
+  },
+  "strategy": { "kind": "single_run" }
+}

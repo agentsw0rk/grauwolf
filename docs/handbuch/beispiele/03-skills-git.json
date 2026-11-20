@@ -1,0 +1,16 @@
+{
+  "spec_version": 1,
+  "name": "team_poet",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist ein hilfreicher Assistent. Prüfe deine Fähigkeiten, bevor du antwortest.",
+  "skills": [
+    { "dir": "03-skills" },
+    {
+      "git": "https://github.com/example/grauwolf-skills.git",
+      "path": "writing",
+      "tag": "v1.0.0",
+      "names": ["pirate-translator"]
+    }
+  ],
+  "strategy": { "kind": "single_run" }
+}

@@ -1,0 +1,184 @@
+[package]
+name = "grauwolf-host"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+default = ["ollama", "openai", "anthropic", "gemini", "bedrock", "sandbox", "mcp", "builtin", "git", "fetch", "command", "atlassian", "sql", "pgvector", "otel", "a2a", "systemone", "packages", "credentials"]
+ollama = ["dep:grauwolf-ollama"]
+openai = ["dep:grauwolf-openai"]
+anthropic = ["dep:grauwolf-anthropic"]
+gemini = ["dep:grauwolf-gemini"]
+bedrock = ["dep:grauwolf-bedrock"]
+sandbox = ["dep:grauwolf-sandbox"]
+credentials = ["dep:grauwolf-credentials", "dep:grauwolf-openbao"]
+packages = ["sandbox", "dep:grauwolf-toolpkg", "grauwolf-agent-tree/packages"]
+mcp = ["dep:grauwolf-mcp"]
+builtin = ["dep:grauwolf-builtin-tools"]
+git = ["dep:grauwolf-tools-git"]
+fetch = ["dep:grauwolf-tools-web"]
+command = ["dep:grauwolf-tools-command"]
+atlassian = ["dep:grauwolf-atlassian"]
+sql = ["dep:grauwolf-store-sql"]
+pgvector = ["dep:grauwolf-store-pgvector"]
+a2a = ["dep:grauwolf-a2a"]
+systemone = ["dep:grauwolf-systemone"]
+otel = ["dep:grauwolf-otel", "dep:opentelemetry", "dep:opentelemetry_sdk", "dep:opentelemetry-otlp"]
+
+[dependencies]
+base64.workspace = true
+futures-util.workspace = true
+grauwolf-agent-tree.workspace = true
+grauwolf-agents.workspace = true
+grauwolf-config.workspace = true
+grauwolf-credentials = { workspace = true, optional = true }
+grauwolf-spiffe.workspace = true
+grauwolf-identity.workspace = true
+grauwolf-openbao = { workspace = true, optional = true }
+grauwolf-a2a = { workspace = true, optional = true }
+grauwolf-builder-agent.workspace = true
+grauwolf-builtin-tools = { workspace = true, optional = true }
+grauwolf-atlassian = { workspace = true, optional = true }
+grauwolf-anthropic = { workspace = true, optional = true }
+grauwolf-gemini = { workspace = true, optional = true }
+grauwolf-bedrock = { workspace = true, optional = true }
+grauwolf-egress.workspace = true
+grauwolf-generator.workspace = true
+grauwolf-graph.workspace = true
+grauwolf-interpreter.workspace = true
+grauwolf-llm.workspace = true
+grauwolf-mcp = { workspace = true, optional = true }
+grauwolf-ollama = { workspace = true, optional = true }
+grauwolf-openai = { workspace = true, optional = true }
+grauwolf-prompt.workspace = true
+grauwolf-rag.workspace = true
+grauwolf-sandbox = { workspace = true, optional = true }
+grauwolf-spec.workspace = true
+grauwolf-store-sql = { workspace = true, optional = true }
+grauwolf-store-pgvector = { workspace = true, optional = true }
+grauwolf-systemone = { workspace = true, optional = true }
+grauwolf-otel = { workspace = true, optional = true }
+opentelemetry = { workspace = true, optional = true }
+opentelemetry_sdk = { workspace = true, optional = true }
+opentelemetry-otlp = { workspace = true, optional = true }
+grauwolf-toolbuild.workspace = true
+grauwolf-toolpkg = { workspace = true, optional = true }
+grauwolf-tools.workspace = true
+grauwolf-tools-git = { workspace = true, optional = true }
+grauwolf-tools-web = { workspace = true, optional = true }
+grauwolf-tools-command = { workspace = true, optional = true }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["fs", "sync"] }
+
+
+[dev-dependencies]
+grauwolf-spiffe = { workspace = true, features = ["testing"] }
+grauwolf-test.workspace = true
+grauwolf-mcp = { workspace = true, features = ["test-sse-server"] }
+grauwolf-git = { workspace = true, features = ["test-git-server"] }
+grauwolf-toolpkg = { workspace = true, features = ["test-registry"] }
+reqwest.workspace = true
+tokio.workspace = true
+wiremock.workspace = true
+futures-executor.workspace = true
+
+# Integration tests that need optional features: skipped in builds without them
+# (feature matrix of `cargo xtask check --full`, ADR-0108).
+[[test]]
+name = "egress_addresses"
+required-features = ["ollama", "openai", "anthropic", "gemini", "bedrock"]
+
+[[test]]
+name = "agent_tree"
+required-features = ["mcp", "builtin", "sandbox", "a2a", "packages"]
+
+[[test]]
+name = "atlassian_git"
+required-features = ["mcp", "builtin", "git", "atlassian"]
+
+[[test]]
+name = "workload_identity"
+required-features = ["mcp", "builtin", "git", "fetch", "command"]
+
+[[test]]
+name = "code_files"
+required-features = ["mcp", "builtin", "sandbox", "a2a"]
+
+[[test]]
+name = "docs_examples"
+required-features = ["mcp", "builtin", "sandbox", "a2a"]
+
+[[test]]
+name = "external"
+required-features = ["mcp", "builtin"]
+
+[[test]]
+name = "git_packages"
+required-features = ["packages"]
+
+[[test]]
+name = "loader"
+required-features = ["mcp", "builtin", "sandbox", "a2a"]
+
+[[test]]
+name = "mcp_server"
+required-features = ["mcp"]
+
+[[test]]
+name = "mcp_sse"
+required-features = ["mcp"]
+
+[[test]]
+name = "otel"
+required-features = ["otel"]
+
+
+[[test]]
+name = "pack"
+required-features = ["packages"]
+
+[[test]]
+name = "providers"
+required-features = ["ollama", "openai", "anthropic", "gemini", "bedrock"]
+
+[[test]]
+name = "self_tools"
+required-features = ["sandbox"]
+
+[[test]]
+name = "git_skills"
+required-features = ["mcp", "builtin", "packages"]
+
+[[test]]
+name = "skills"
+required-features = ["mcp", "builtin"]
+
+
+[[test]]
+name = "todo"
+required-features = ["builtin"]
+
+[[test]]
+name = "tool_files"
+required-features = ["mcp", "builtin", "sandbox", "a2a"]
+
+[[test]]
+name = "tool_policy"
+required-features = ["packages"]
+
+[[test]]
+name = "tools_dir"
+required-features = ["sandbox"]
+
+[[test]]
+name = "provisioning"
+required-features = ["mcp", "builtin", "sandbox"]
+
+[[test]]
+name = "credentials"
+required-features = ["credentials", "openai"]

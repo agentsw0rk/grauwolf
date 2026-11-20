@@ -1,0 +1,29 @@
+---
+source: crates/domain/grauwolf-generator/tests/generate.rs
+expression: echo
+---
+# Generated from the AgentSpec `echo` – do not edit by hand.
+
+[package]
+name = "echo"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+grauwolf-agents = { path = "/opt/grauwolf/crates/domain/grauwolf-agents" }
+grauwolf-graph = { path = "/opt/grauwolf/crates/domain/grauwolf-graph" }
+grauwolf-llm = { path = "/opt/grauwolf/crates/domain/grauwolf-llm" }
+grauwolf-prompt = { path = "/opt/grauwolf/crates/domain/grauwolf-prompt" }
+serde_json = "1"
+grauwolf = { path = "/opt/grauwolf/crates/apps/grauwolf", optional = true }
+
+[features]
+app = ["dep:grauwolf"]
+service = ["app", "grauwolf/service", "grauwolf/otel", "grauwolf/credentials"]
+
+[[bin]]
+name = "agent"
+path = "src/main.rs"
+required-features = ["service"]

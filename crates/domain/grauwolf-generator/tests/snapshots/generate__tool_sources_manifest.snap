@@ -1,0 +1,14 @@
+---
+source: crates/domain/grauwolf-generator/tests/generate.rs
+expression: "files[&PathBuf::from(\"tools/tools.json\")]"
+---
+{
+  "format": 1,
+  "tools": [
+    {
+      "name": "add",
+      "module": "tools/add.wasm",
+      "sha256": "sha256:add"
+    }
+  ]
+}

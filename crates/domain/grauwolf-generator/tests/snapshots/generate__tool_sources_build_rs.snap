@@ -1,0 +1,27 @@
+---
+source: crates/domain/grauwolf-generator/tests/generate.rs
+expression: "generated.files[&PathBuf::from(\"build.rs\")]"
+---
+//! Generated – do not edit by hand (ADR-0095).
+//!
+//! The tools of this crate are shipped as sources under `tools/`; their WASM modules are
+//! built by `grauwolf tools build .` before `cargo build`.
+
+const MODULES: &[&str] = &[
+    "tools/add.wasm",
+];
+
+fn main() {
+    println!("cargo:rerun-if-changed=tools");
+    let missing: Vec<&str> = MODULES
+        .iter()
+        .copied()
+        .filter(|module| !std::path::Path::new(module).is_file())
+        .collect();
+    if !missing.is_empty() {
+        panic!(
+            "tool modules missing: {} - run `grauwolf tools build .` in this directory first",
+            missing.join(", ")
+        );
+    }
+}

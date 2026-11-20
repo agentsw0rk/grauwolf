@@ -1,0 +1,8 @@
+{
+  "spec_version": 1,
+  "name": "notes_reader",
+  "model": { "provider": "ollama", "id": "llama3.2" },
+  "system_prompt": "Answer questions about the notes in the working folder; read them with read_file.",
+  "builtin_tools": { "tools": ["read_file"], "root": "../workspace" },
+  "strategy": { "kind": "single_run" }
+}

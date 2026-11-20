@@ -1,0 +1,11 @@
+{
+  "spec_version": 1,
+  "name": "notes_helper",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You help with the notes in the workspace folder. Look things up before you answer, and ask back if something is unclear. Answer in English.",
+  "builtin_tools": {
+    "tools": ["list_directory", "read_file", "search_files", "ask_user"],
+    "root": "03-tools/workspace"
+  },
+  "strategy": { "kind": "single_run" }
+}

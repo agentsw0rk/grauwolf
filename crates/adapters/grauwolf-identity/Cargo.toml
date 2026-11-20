@@ -1,0 +1,30 @@
+[package]
+name = "grauwolf-identity"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+# Test helpers: an Entra stand-in with RSA keys made at test time, a trusting person verifier.
+testing = []
+
+[dependencies]
+aws-lc-rs = { version = "1", default-features = false, features = ["aws-lc-sys"] }
+base64.workspace = true
+futures-util.workspace = true
+grauwolf-openbao.workspace = true
+grauwolf-spiffe.workspace = true
+grauwolf-tools.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["sync", "time", "rt"] }
+
+[dev-dependencies]
+grauwolf-identity = { path = ".", features = ["testing"] }
+grauwolf-spiffe = { workspace = true, features = ["testing"] }
+grauwolf-test.workspace = true
+tokio = { workspace = true, features = ["macros", "rt"] }
+wiremock.workspace = true

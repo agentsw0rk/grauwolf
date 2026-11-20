@@ -1,0 +1,16 @@
+{
+  "spec_version": 1,
+  "name": "git_pack_user",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You calculate. Use the tools of the package for every calculation.",
+  "tool_packages": [
+    {
+      "git": "https://github.com/example/grauwolf-tools.git",
+      "path": "text-and-math",
+      "tag": "v1.0.0",
+      "tools": ["add", "count_words"],
+      "as": { "count_words": "word_count" }
+    }
+  ],
+  "strategy": { "kind": "single_run" }
+}

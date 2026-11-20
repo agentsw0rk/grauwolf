@@ -1,0 +1,39 @@
+{
+  "spec_version": 1,
+  "name": "limited_calculator",
+  "model": {
+    "provider": "ollama",
+    "id": "llama3.2"
+  },
+  "system_prompt": "You are a calculator. Use the tools for every arithmetic operation.",
+  "tools": [
+    {
+      "name": "add",
+      "description": "Adds two numbers",
+      "args": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "number"
+          },
+          "b": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "a",
+          "b"
+        ]
+      },
+      "code": "let a = args[\"a\"].as_f64().ok_or(\"a missing\")?;\nlet b = args[\"b\"].as_f64().ok_or(\"b missing\")?;\nOk((a + b).to_string())"
+    }
+  ],
+  "limits": {
+    "max_steps": 10,
+    "max_tool_calls": 1,
+    "max_tokens": 100000
+  },
+  "strategy": {
+    "kind": "single_run"
+  }
+}

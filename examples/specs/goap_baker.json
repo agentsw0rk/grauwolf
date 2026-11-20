@@ -1,0 +1,41 @@
+{
+  "spec_version": 1,
+  "name": "goap_baker",
+  "model": { "provider": "ollama", "id": "llama3.2" },
+  "system_prompt": "You are a baker. Carry out exactly the named action and describe it in one sentence.",
+  "subgraphs": {
+    "buy": { "graph": {
+      "nodes": [ { "id": "buy", "kind": "llm_request" } ],
+      "edges": [ { "from": "start", "to": "buy" },
+                 { "from": "buy", "to": "finish", "when": { "kind": "on_assistant_message" } } ] } },
+    "knead": { "graph": {
+      "nodes": [ { "id": "knead", "kind": "llm_request" } ],
+      "edges": [ { "from": "start", "to": "knead" },
+                 { "from": "knead", "to": "finish", "when": { "kind": "on_assistant_message" } } ] } },
+    "bake": { "model": { "provider": "ollama", "id": "llama3.2" }, "graph": {
+      "nodes": [ { "id": "bake", "kind": "llm_request" } ],
+      "edges": [ { "from": "start", "to": "bake" },
+                 { "from": "bake", "to": "finish", "when": { "kind": "on_assistant_message" } } ] } }
+  },
+  "graph": {
+    "nodes": [
+      { "id": "baker", "kind": "goap", "params": {
+        "state": { "has_flour": false, "dough_ready": false, "bread_baked": false },
+        "actions": [
+          { "name": "buy_flour", "subgraph": "buy", "effects": { "has_flour": true }, "cost": 2,
+            "description": "Buy flour, yeast and salt." },
+          { "name": "knead_dough", "subgraph": "knead", "pre": { "has_flour": true },
+            "effects": { "dough_ready": true } },
+          { "name": "bake_bread", "subgraph": "bake", "pre": { "dough_ready": true },
+            "effects": { "bread_baked": true } }
+        ],
+        "goals": [ { "name": "bread", "facts": { "bread_baked": true } } ],
+        "max_iterations": 6
+      } }
+    ],
+    "edges": [
+      { "from": "start", "to": "baker" },
+      { "from": "baker", "to": "finish" }
+    ]
+  }
+}

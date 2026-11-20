@@ -1,0 +1,42 @@
+[package]
+name = "grauwolf-agent-tree"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+# The resolve phase locks tool packages and git skills (`grauwolf-toolpkg`); without it a spec
+# that has them is refused.
+packages = ["dep:grauwolf-toolpkg"]
+
+[dependencies]
+grauwolf-builtin-tools.workspace = true
+grauwolf-config.workspace = true
+grauwolf-generator.workspace = true
+grauwolf-spec.workspace = true
+grauwolf-toolbuild.workspace = true
+grauwolf-toolpkg = { workspace = true, optional = true }
+grauwolf-tools.workspace = true
+toml.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+grauwolf-test.workspace = true
+grauwolf-git = { workspace = true, features = ["test-git-server"] }
+grauwolf-toolpkg = { workspace = true, features = ["test-registry"] }
+tokio.workspace = true
+
+# Integration tests that need optional features: skipped in builds without them
+# (feature matrix of `cargo xtask check --full`, ADR-0108).
+[[test]]
+name = "resolve"
+required-features = ["packages"]
+
+[[test]]
+name = "copy"
+required-features = ["packages"]
+
+[[test]]
+name = "git_skills"
+required-features = ["packages"]

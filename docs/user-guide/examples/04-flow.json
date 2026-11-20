@@ -1,0 +1,50 @@
+{
+  "spec_version": 1,
+  "name": "topic_flow",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "input": "string",
+  "output": "string",
+  "agent_tools": {
+    "researcher": { "spec": "04-flow/researcher.json", "description": "Picks three topics as a JSON list" },
+    "writer": { "spec": "04-flow/writer.json", "description": "Writes two sentences about one topic" },
+    "summarizer": { "spec": "04-flow/summarizer.json", "description": "Summarizes a JSON list of articles" }
+  },
+  "graph": {
+    "nodes": [
+      { "id": "research", "kind": "agent", "params": { "agent": "researcher" } },
+      {
+        "id": "write_all",
+        "kind": "for_each",
+        "params": {
+          "input": "string",
+          "output": "string",
+          "body": { "agent": "writer" },
+          "max_parallel": 2,
+          "on_error": "skip"
+        }
+      },
+      { "id": "summarize", "kind": "agent", "params": { "agent": "summarizer" } },
+      {
+        "id": "check",
+        "kind": "decide",
+        "params": {
+          "value": "string",
+          "kind": "yes_no",
+          "question": "Is this a coherent summary of several short articles?",
+          "yes": "A readable paragraph that sums up the articles",
+          "no": "Empty, broken or not a summary"
+        }
+      },
+      { "id": "retry", "kind": "agent", "params": { "agent": "summarizer" } }
+    ],
+    "edges": [
+      { "from": "start", "to": "research" },
+      { "from": "research", "to": "write_all" },
+      { "from": "write_all", "to": "summarize" },
+      { "from": "summarize", "to": "check" },
+      { "from": "check", "to": "finish", "when": { "kind": "on_decision", "params": { "answers": ["yes"] } } },
+      { "from": "check", "to": "retry", "when": { "kind": "on_decision", "params": { "answers": ["no"] } } },
+      { "from": "retry", "to": "finish" }
+    ]
+  }
+}

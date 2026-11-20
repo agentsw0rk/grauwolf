@@ -1,0 +1,29 @@
+{
+  "spec_version": 1,
+  "name": "draft_and_summary",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "First you write a short draft in English. When you then get your draft back, you summarize it in a single sentence.",
+  "subgraphs": {
+    "draft": {
+      "model": { "provider": "anthropic", "id": "claude-haiku-5-5" },
+      "graph": {
+        "nodes": [{ "id": "write", "kind": "llm_request" }],
+        "edges": [
+          { "from": "start", "to": "write" },
+          { "from": "write", "to": "finish", "when": { "kind": "on_assistant_message" } }
+        ]
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      { "id": "draft", "kind": "subgraph", "params": { "subgraph": "draft" } },
+      { "id": "summary", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "draft" },
+      { "from": "draft", "to": "summary" },
+      { "from": "summary", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

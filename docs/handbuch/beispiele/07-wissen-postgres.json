@@ -1,0 +1,15 @@
+{
+  "spec_version": 1,
+  "name": "caretaker_pg",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du beantwortest Fragen zur Hausordnung. Schlage vor jeder Antwort mit search_house_rules nach und nenne die Quelle. Steht etwas nicht in den Dokumenten, sag das.",
+  "knowledge": {
+    "sources": ["07-wissen"],
+    "embedding_model": { "provider": "ollama", "id": "nomic-embed-text" },
+    "tool": "search_house_rules",
+    "chunk_size": 500,
+    "top_k": 2,
+    "store": { "kind": "postgres", "url_env": "PGVECTOR_URL" }
+  },
+  "strategy": { "kind": "single_run" }
+}

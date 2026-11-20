@@ -1,0 +1,54 @@
+[package]
+name = "grauwolf-server"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+default = ["ollama", "service", "otel"]
+ollama = ["dep:grauwolf-ollama", "grauwolf-host/ollama"]
+sql = ["grauwolf-host/sql"]
+otel = ["grauwolf-host/otel"]
+service = ["grauwolf-host/mcp", "tokio/net", "tokio/signal", "tokio/rt-multi-thread"]
+
+[dependencies]
+axum = { workspace = true }
+futures-util.workspace = true
+getrandom.workspace = true
+grauwolf-agents.workspace = true
+grauwolf-host.workspace = true
+grauwolf-identity.workspace = true
+grauwolf-interpreter.workspace = true
+grauwolf-llm.workspace = true
+grauwolf-mcp.workspace = true
+grauwolf-ollama = { workspace = true, optional = true }
+grauwolf-prompt.workspace = true
+grauwolf-spiffe.workspace = true
+grauwolf-spec.workspace = true
+grauwolf-tools.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tokio = { workspace = true, features = ["fs", "sync", "net", "time", "rt"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["aws_lc_rs"] }
+
+[dev-dependencies]
+grauwolf-identity = { workspace = true, features = ["testing"] }
+grauwolf-a2a.workspace = true
+grauwolf-otel.workspace = true
+opentelemetry.workspace = true
+opentelemetry_sdk = { workspace = true, features = ["testing"] }
+grauwolf-spiffe = { workspace = true, features = ["testing"] }
+futures-executor.workspace = true
+grauwolf-host = { workspace = true, features = ["mcp", "builtin", "command"] }
+wiremock.workspace = true
+grauwolf-test.workspace = true
+reqwest = { workspace = true }
+tokio = { workspace = true, features = ["net"] }
+
+# Integration tests that need optional features: skipped in builds without them
+# (feature matrix of `cargo xtask check --full`, ADR-0108).
+[[test]]
+name = "chat_api_models"
+required-features = ["ollama"]

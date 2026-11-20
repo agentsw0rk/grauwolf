@@ -1,0 +1,19 @@
+{
+  "spec_version": 1,
+  "name": "adder",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist ein Rechenassistent. Nutze für jede Addition das Tool add und antworte auf Deutsch.",
+  "tools": [
+    {
+      "name": "add",
+      "description": "Addiert zwei Zahlen a und b",
+      "args": {
+        "type": "object",
+        "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+        "required": ["a", "b"]
+      },
+      "code_file": "03-werkzeuge/addiere.rs"
+    }
+  ],
+  "strategy": { "kind": "single_run" }
+}

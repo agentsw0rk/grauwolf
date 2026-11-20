@@ -1,0 +1,17 @@
+{
+  "spec_version": 1,
+  "name": "coordinator",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du koordinierst Anfragen an den Kundenservice. Fehlermeldungen gibst du an create_ticket weiter, Übersetzungen ins Deutsche an translator. Danach fasst du die Ergebnisse kurz für den Nutzer zusammen.",
+  "agent_tools": {
+    "translator": {
+      "spec": "08-team/uebersetzer.json",
+      "description": "Übersetzt einen englischen Text ins Deutsche"
+    },
+    "create_ticket": {
+      "spec": "08-team/ticket_erfassen.json",
+      "description": "Macht aus einer Fehlermeldung ein Ticket mit Titel, Priorität und Tags"
+    }
+  },
+  "strategy": { "kind": "single_run" }
+}

@@ -1,0 +1,31 @@
+# grauwolf-oci
+
+**Layer:** `adapters` · **Status:** extracted from grauwolf-toolpkg in stage 3b of ADR-0108; behavior unchanged. `RegistryClient` (own client over reqwest, distribution API v2: every request goes through `send(method, …, scope)` with the pull scope `repository:<repo>:pull` or the push scope `repository:<repo>:push,pull`; `manifest(ref)` asks for (Accept) OCI image and artifact manifests, OCI image indexes and docker manifest lists/v2 – without them registries answer a converted representation whose digest does not match –, `blob(ref, digest)`; `push(ref, &OciImage)`: `HEAD` blob check, monolithic upload `POST …/blobs/uploads/` + `PUT <location>?digest=` for missing blobs, then `PUT` of the manifest (image manifest media type), returns the manifest digest; anonymous, bearer-token flow from `WWW-Authenticate`, basic credentials; plain http only for `localhost`/`127.0.0.1`), `RegistryAuth` (`GRAUWOLF_REGISTRY_AUTH`: JSON map registry → `"user:token"` or bearer token; fallback `DockerConfig` from `$DOCKER_CONFIG/config.json` or `~/.docker/config.json`: `auths` (`auth`, `identitytoken`), `credHelpers`, `credsStore` via `docker-credential-<name> get` run in `spawn_blocking` with a timeout; helper search path is a parameter, `from_env` uses `PATH`; registry names normalized like Docker, `docker.io` ↔ `index.docker.io/v1/`, ports kept), `OciImage` (manifest bytes, digest and blobs; `write_layout(dir, artifact_type)`/`read_layout(dir)` for an OCI image layout directory `oci-layout`, `index.json`, `blobs/sha256/<hex>`), `OciError`, `sha256_digest`. Feature `test-registry`: `testing::TestRegistry` (in-memory registry on 127.0.0.1 with blob `HEAD`/`POST`/`PATCH`/`PUT` and manifest `PUT` that checks the referenced blobs; `add_blob`, `push_raw_manifest`, `corrupt_blob`, `requests`; optional token challenge: read token, and a distinct push token only for a `push` scope and, with a login, only to a caller that sent it); the example `serve_empty_registry` serves an empty one for live checks of `tools push`.
+
+**Cosign signatures (ADR-0107 stage 4), module `cosign`:** `SigningKey` (generate, PKCS#8 PEM unencrypted, `sign(payload)` → base64 DER ECDSA P-256/SHA-256), `PublicKey` (SPKI PEM as `cosign.pub`, `fingerprint()` = `SHA256:<base64>` of the SPKI, `verifies`), `payload(identity, digest)` (the simple-signing JSON), `signature_tag(digest)` (`sha256-<hex>.sig`), `Signature { payload, signature }` and `verify(signatures, keys, identity, digest)` → fingerprint of the key, `CosignError::{Key, Unsigned, Invalid}`. Media type of the layer `application/vnd.dev.cosign.simplesigning.v1+json`, annotation `dev.cosignproject.cosign/signature`. `RegistryClient::signatures(ref, digest)` reads the signature image `sha256-<hex>.sig` of the repository (none if absent; layers without the annotation or of another media type are ignored; payload blobs verified by digest) and `push_signature(ref, digest, &SigningKey)` signs with identity `registry/repository` and pushes, keeping the layers already there (descriptors unchanged) and adding nothing for an identical signature. Keyless signing (Fulcio, Rekor) and cosign's encrypted private keys are not supported.
+
+**Listing and conditional writes (ADR-0124):** `RegistryClient::tags(ref)` (`/v2/<repo>/tags/list`, none for a missing repository) and `repositories(registry)` (`/v2/_catalog` with scope `registry:catalog:*`; `None` when the registry does not offer it: 404, 405 or refused), both following `Link: <…>; rel="next"` on the registry host (at most 100 pages). `push_if(ref, image, Some(Some(digest)) | Some(None) | None)` sends `If-Match: "<digest>"` / `If-None-Match: *` with the manifest `PUT`; `412` is `OciError::Conflict`. Registries that ignore the headers just write – callers verify afterwards. `TestRegistry`: `tags/list`, `_catalog` after `offer_catalog()`, conditional `PUT`s after `honour_conditional_writes()`, `interfere_with_next_put(repo, tag, manifest)` (a concurrent writer just before a conditional or just after an unconditional `PUT`), `manifest(repo, reference)`.
+
+## Purpose
+The general OCI distribution client: fetches and pushes manifests and blobs, authenticates, verifies digests. It does not know what an artifact is; media types and the meaning of a manifest belong to the callers (grauwolf-toolpkg for tool packages).
+
+## Features / ADRs
+E03 (F03.18, F03.20, F03.21 partly), ADR-0107, ADR-0108
+
+## Allowed dependencies
+- grauwolf crates: grauwolf-spec (`OciReference`); dev: grauwolf-test (`TestDir` for temporary directories in tests)
+- External: reqwest, tokio, sha2, base64, p256 (ECDSA for cosign signatures), rand_core (key generation), serde, serde_json, thiserror; feature `test-registry`: axum
+
+Other dependencies only after checking against [ADR-0016](../../../docs/adr/0016-layered-architecture.md).
+
+## Invariants
+- Every manifest and blob is verified against its digest before it is returned; image layouts are verified blob by blob on reading.
+- Credentials go only to the registry or to the token realm it names; error messages never contain secrets.
+- Plain http only for `localhost` and `127.0.0.1` registries (like Docker's insecure-local default).
+- Credentials are looked up lazily (`RegistryAuth::credential`, async and fallible, only on a challenge or for a static bearer token), so anonymous pulls never depend on them. The upload `Location` must stay on the registry host. Docker configuration and helpers are consulted only after the explicit credentials and never for a static bearer token (a helper never runs for anonymous registries); helper output is parsed and dropped, never put into errors or logs; helper names are restricted to `[A-Za-z0-9_.-]` and looked up in the search path only; an `identitytoken` is sent as a bearer token after a challenge.
+- Nothing tool-specific: no `grauwolf-tools.json`, no tool ABI, no media types of tool packages.
+
+## Working on this crate
+- TDD: one test case per cycle, test + implementation + docs in one commit.
+- `cargo test -p grauwolf-oci`; before the commit `cargo fmt --all` and `cargo xtask check --affected`; before a push `cargo xtask check --full`.
+- Update this file when purpose, API, dependencies, or invariants change.

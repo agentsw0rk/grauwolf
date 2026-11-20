@@ -1,0 +1,19 @@
+{
+  "spec_version": 1,
+  "name": "word_counter",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You count words with the tool count_words and state the result in one sentence.",
+  "tools": [
+    {
+      "name": "count_words",
+      "description": "Counts the words of a text.",
+      "args": {
+        "type": "object",
+        "properties": { "text": { "type": "string" } },
+        "required": ["text"]
+      },
+      "code": "let text = args[\"text\"].as_str().ok_or(\"text is missing\")?;\nOk(text.split_whitespace().count().to_string())"
+    }
+  ],
+  "strategy": { "kind": "single_run" }
+}

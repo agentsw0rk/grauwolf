@@ -1,0 +1,24 @@
+{
+  "spec_version": 1,
+  "name": "verified_calculator",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You are a calculation assistant. Use the tool add for every addition and answer in English.",
+  "tools": [
+    {
+      "name": "add",
+      "description": "Adds two numbers a and b",
+      "args": {
+        "type": "object",
+        "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+        "required": ["a", "b"]
+      },
+      "code_file": "03-tools/add.rs"
+    }
+  ],
+  "strategy": {
+    "kind": "verified",
+    "params": {
+      "verify_prompt": "Check whether every number in the answer is correct and whether the question is fully answered. Set correct to true or false and describe in feedback what is wrong."
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# Tool policy: next to the spec (or named by GRAUWOLF_TOOL_POLICY). Paths are relative to this file.
+[tool_packages]
+# Registries or registry/repository prefixes that may be used. Missing: any; empty list: none.
+allowed_registries = ["registry.example.com/team", "ghcr.io/example"]
+# Git hosts or host/path prefixes that may be used. Missing: any; empty list: none.
+allowed_git_hosts = ["github.com/example"]
+# Every package must be signed by one of the keys below.
+require_signatures = true
+# Public keys (PEM) for OCI packages: from `grauwolf tools keygen` or cosign.
+oci_keys = ["keys/team.pub"]
+# Signers of git commits and tags, in the format of git's gpg.ssh.allowedSignersFile.
+git_allowed_signers = "keys/allowed_signers"

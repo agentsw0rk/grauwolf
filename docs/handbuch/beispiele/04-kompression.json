@@ -1,0 +1,63 @@
+{
+  "spec_version": 1,
+  "name": "frugal_calculator",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist ein Rechenassistent. Nutze für jede Addition das Tool add und antworte auf Deutsch.",
+  "tools": [
+    {
+      "name": "add",
+      "description": "Addiert zwei Zahlen a und b",
+      "args": {
+        "type": "object",
+        "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+        "required": ["a", "b"]
+      },
+      "code_file": "03-werkzeuge/addiere.rs"
+    }
+  ],
+  "graph": {
+    "nodes": [
+      { "id": "ask", "kind": "llm_request" },
+      { "id": "execute", "kind": "execute_tool" },
+      {
+        "id": "trim",
+        "kind": "compress_history",
+        "params": { "value": "tool_result", "strategy": "keep_last", "keep": 6 }
+      },
+      { "id": "send_back", "kind": "llm_send_tool_result" },
+      { "id": "execute_all", "kind": "execute_multiple_tools", "params": { "sequential": true } },
+      {
+        "id": "trim_all",
+        "kind": "compress_history",
+        "params": { "value": "tool_results", "strategy": "keep_last", "keep": 6 }
+      },
+      { "id": "send_all_back", "kind": "llm_send_multiple_tool_results" }
+    ],
+    "edges": [
+      { "from": "start", "to": "ask" },
+      { "from": "ask", "to": "execute", "when": { "kind": "on_tool_call" } },
+      { "from": "ask", "to": "execute_all", "when": { "kind": "on_multiple_tool_calls" } },
+      { "from": "ask", "to": "finish", "when": { "kind": "on_assistant_message" } },
+      {
+        "from": "execute",
+        "to": "trim",
+        "when": { "kind": "on_history_longer", "params": { "messages": 12 } }
+      },
+      { "from": "execute", "to": "send_back" },
+      { "from": "trim", "to": "send_back" },
+      { "from": "send_back", "to": "execute", "when": { "kind": "on_tool_call" } },
+      { "from": "send_back", "to": "execute_all", "when": { "kind": "on_multiple_tool_calls" } },
+      { "from": "send_back", "to": "finish", "when": { "kind": "on_assistant_message" } },
+      {
+        "from": "execute_all",
+        "to": "trim_all",
+        "when": { "kind": "on_history_longer", "params": { "messages": 12 } }
+      },
+      { "from": "execute_all", "to": "send_all_back" },
+      { "from": "trim_all", "to": "send_all_back" },
+      { "from": "send_all_back", "to": "execute", "when": { "kind": "on_tool_call" } },
+      { "from": "send_all_back", "to": "execute_all", "when": { "kind": "on_multiple_tool_calls" } },
+      { "from": "send_all_back", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

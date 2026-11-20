@@ -1,0 +1,15 @@
+[package]
+name = "grauwolf-codegen"
+description = "Builder API for generating Rust code (fork of codegen 0.3.0 by Carl Lerche)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+# Fork of codegen 0.3.0 (MIT), see LICENSE-MIT and NOTICE in the workspace root.
+license = "MIT"
+
+[dependencies]
+indexmap = "2.11"
+# grauwolf extension (src/formatted.rs)
+prettyplease = "0.2"
+proc-macro2 = { version = "1", features = ["span-locations"] }
+syn = { version = "2", features = ["full"] }

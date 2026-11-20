@@ -1,0 +1,10 @@
+{
+  "name": "count_words",
+  "description": "Counts the words of a text",
+  "args": {
+    "type": "object",
+    "properties": { "text": { "type": "string" } },
+    "required": ["text"]
+  },
+  "code_file": "count_words.rs"
+}

@@ -1,0 +1,96 @@
+[workspace]
+resolver = "3"
+members = ["crates/*/*", "xtask"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+repository = ""
+
+[workspace.dependencies]
+grauwolf-prompt = { path = "crates/domain/grauwolf-prompt" }
+grauwolf-llm = { path = "crates/domain/grauwolf-llm" }
+grauwolf-tools = { path = "crates/domain/grauwolf-tools" }
+grauwolf-tools-app = { path = "crates/apps/grauwolf-tools-app" }
+grauwolf-graph = { path = "crates/domain/grauwolf-graph" }
+grauwolf-agents = { path = "crates/domain/grauwolf-agents" }
+grauwolf-spec = { path = "crates/domain/grauwolf-spec" }
+grauwolf-spec-model = { path = "crates/domain/grauwolf-spec-model" }
+grauwolf-strategies = { path = "crates/domain/grauwolf-strategies" }
+grauwolf-interpreter = { path = "crates/domain/grauwolf-interpreter" }
+grauwolf-generator = { path = "crates/domain/grauwolf-generator" }
+grauwolf-builder-agent = { path = "crates/domain/grauwolf-builder-agent" }
+grauwolf-rag = { path = "crates/domain/grauwolf-rag" }
+grauwolf-planner = { path = "crates/domain/grauwolf-planner" }
+grauwolf-llm-http = { path = "crates/adapters/grauwolf-llm-http" }
+grauwolf-openai = { path = "crates/adapters/grauwolf-openai" }
+grauwolf-anthropic = { path = "crates/adapters/grauwolf-anthropic" }
+grauwolf-gemini = { path = "crates/adapters/grauwolf-gemini" }
+grauwolf-bedrock = { path = "crates/adapters/grauwolf-bedrock" }
+grauwolf-ollama = { path = "crates/adapters/grauwolf-ollama" }
+grauwolf-systemone = { path = "crates/adapters/grauwolf-systemone" }
+grauwolf-atlassian = { path = "crates/adapters/grauwolf-atlassian" }
+grauwolf-builtin-tools = { path = "crates/adapters/grauwolf-builtin-tools" }
+grauwolf-tools-git = { path = "crates/adapters/grauwolf-tools-git" }
+grauwolf-tools-web = { path = "crates/adapters/grauwolf-tools-web" }
+grauwolf-tools-command = { path = "crates/adapters/grauwolf-tools-command" }
+grauwolf-store-sql = { path = "crates/adapters/grauwolf-store-sql" }
+grauwolf-store-pgvector = { path = "crates/adapters/grauwolf-store-pgvector" }
+grauwolf-otel = { path = "crates/adapters/grauwolf-otel" }
+grauwolf-a2a = { path = "crates/adapters/grauwolf-a2a" }
+grauwolf-server = { path = "crates/apps/grauwolf-server", default-features = false }
+grauwolf-toolbuild = { path = "crates/adapters/grauwolf-toolbuild" }
+grauwolf-oci = { path = "crates/adapters/grauwolf-oci" }
+grauwolf-git = { path = "crates/adapters/grauwolf-git" }
+grauwolf-toolpkg = { path = "crates/adapters/grauwolf-toolpkg" }
+grauwolf-config = { path = "crates/adapters/grauwolf-config" }
+grauwolf-credentials = { path = "crates/adapters/grauwolf-credentials" }
+grauwolf-k8s = { path = "crates/adapters/grauwolf-k8s" }
+grauwolf-openbao = { path = "crates/adapters/grauwolf-openbao" }
+grauwolf-spiffe = { path = "crates/adapters/grauwolf-spiffe" }
+grauwolf-identity = { path = "crates/adapters/grauwolf-identity" }
+grauwolf-agent-tree = { path = "crates/adapters/grauwolf-agent-tree" }
+grauwolf-egress = { path = "crates/adapters/grauwolf-egress" }
+grauwolf-sandbox = { path = "crates/adapters/grauwolf-sandbox" }
+grauwolf-mcp = { path = "crates/adapters/grauwolf-mcp" }
+grauwolf-codegen = { path = "crates/support/grauwolf-codegen" }
+grauwolf-macros = { path = "crates/support/grauwolf-macros" }
+grauwolf-test = { path = "crates/support/grauwolf-test" }
+grauwolf = { path = "crates/apps/grauwolf" }
+grauwolf-host = { path = "crates/apps/grauwolf-host", default-features = false }
+futures-executor = "0.3"
+insta = "1"
+futures-util = "0.3"
+getrandom = "0.3"
+libc = "0.2"
+sha2 = "0.10"
+hmac = "0.12"
+git2 = { version = "0.21", default-features = false, features = ["vendored-libgit2"] }
+regex = "1"
+schemars = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_path_to_error = "0.1"
+base64 = "0.22"
+ssh-key = { version = "0.6", default-features = false, features = ["ed25519", "p256", "std", "rand_core"] }
+p256 = { version = "0.13", default-features = false, features = ["ecdsa", "pem", "std"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+toml = { version = "0.8", default-features = false, features = ["parse"] }
+axum = "0.8"
+opentelemetry = { version = "0.33", default-features = false, features = ["trace"] }
+opentelemetry_sdk = { version = "0.33", default-features = false, features = ["trace"] }
+opentelemetry-otlp = { version = "0.33", default-features = false, features = ["trace", "http-proto", "reqwest-blocking-client"] }
+sqlx = { version = "0.8", default-features = false, features = ["any", "sqlite", "postgres", "runtime-tokio", "tls-rustls"] }
+syn = { version = "2", features = ["full"] }
+quote = "1"
+proc-macro2 = "1"
+thiserror = "2"
+reqwest = { version = "0.13", features = ["json"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+wiremock = "0.6"
+
+# Only line tables as debug info: much smaller target/, backtraces keep file and line.
+[profile.dev]
+debug = "line-tables-only"

@@ -1,0 +1,45 @@
+{
+  "spec_version": 1,
+  "name": "ticket_router",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist Support-Mitarbeiter. Antworte kurz und höflich.",
+  "input": "string",
+  "output": "string",
+  "graph": {
+    "nodes": [
+      {
+        "id": "route",
+        "kind": "decide",
+        "params": {
+          "value": "string",
+          "kind": "choice",
+          "question": "Welches Team soll dieses Support-Ticket bearbeiten?",
+          "temperature": 0,
+          "think": false,
+          "options": [
+            { "name": "billing", "description": "Rechnungen, Zahlungen, Erstattungen und Preise" },
+            { "name": "technical", "description": "Fehler, Abstürze und die Bedienung des Produkts" },
+            { "name": "other", "description": "Alles Übrige, z. B. Feedback oder Presseanfragen" }
+          ]
+        }
+      },
+      { "id": "reply", "kind": "llm_request" },
+      {
+        "id": "diagnose",
+        "kind": "llm_reason",
+        "params": {
+          "value": "string",
+          "prompt": "Analysiere das technische Problem im Ticket und schlage eine Lösung vor."
+        }
+      }
+    ],
+    "edges": [
+      { "from": "start", "to": "route" },
+      { "from": "route", "to": "reply", "when": { "kind": "on_decision", "params": { "answers": ["billing"] } } },
+      { "from": "route", "to": "diagnose", "when": { "kind": "on_decision", "params": { "answers": ["technical"] } } },
+      { "from": "route", "to": "finish", "when": { "kind": "on_decision", "params": { "answers": ["other"] } } },
+      { "from": "reply", "to": "finish", "when": { "kind": "on_assistant_message" } },
+      { "from": "diagnose", "to": "finish" }
+    ]
+  }
+}

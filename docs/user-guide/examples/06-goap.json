@@ -1,0 +1,56 @@
+{
+  "spec_version": 1,
+  "name": "newsroom",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You work in a newsroom. Carry out exactly the named action and output only the result.",
+  "subgraphs": {
+    "write": {
+      "graph": {
+        "nodes": [ { "id": "call_llm", "kind": "llm_request" } ],
+        "edges": [
+          { "from": "start", "to": "call_llm" },
+          { "from": "call_llm", "to": "finish", "when": { "kind": "on_assistant_message" } }
+        ]
+      }
+    },
+    "check": {
+      "model": { "provider": "anthropic", "id": "claude-haiku-5-5" },
+      "graph": {
+        "nodes": [ { "id": "call_llm", "kind": "llm_request" } ],
+        "edges": [
+          { "from": "start", "to": "call_llm" },
+          { "from": "call_llm", "to": "finish", "when": { "kind": "on_assistant_message" } }
+        ]
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "edit",
+        "kind": "goap",
+        "params": {
+          "state": { "draft": "none", "facts_checked": false },
+          "values": { "draft": ["none", "rough", "final"] },
+          "actions": [
+            { "name": "write_rough_draft", "subgraph": "write",
+              "pre": { "draft": "none" }, "effects": { "draft": "rough" },
+              "description": "Write a first version of the article." },
+            { "name": "revise", "subgraph": "write",
+              "pre": { "draft": "rough" }, "effects": { "draft": "final" },
+              "description": "Revise the version: shorter, clearer, with a headline." },
+            { "name": "check_facts", "subgraph": "check", "cost": 3,
+              "pre": { "draft": "final" }, "effects": { "facts_checked": true },
+              "description": "Check the claims of the article and output the corrected version." }
+          ],
+          "goals": [ { "name": "publish", "facts": { "draft": "final", "facts_checked": true } } ],
+          "max_iterations": 6
+        }
+      }
+    ],
+    "edges": [
+      { "from": "start", "to": "edit" },
+      { "from": "edit", "to": "finish" }
+    ]
+  }
+}

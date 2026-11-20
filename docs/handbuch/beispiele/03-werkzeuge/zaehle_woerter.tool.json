@@ -1,0 +1,10 @@
+{
+  "name": "count_words",
+  "description": "Zählt die Wörter eines Textes",
+  "args": {
+    "type": "object",
+    "properties": { "text": { "type": "string" } },
+    "required": ["text"]
+  },
+  "code_file": "zaehle_woerter.rs"
+}

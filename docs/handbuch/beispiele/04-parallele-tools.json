@@ -1,0 +1,19 @@
+{
+  "spec_version": 1,
+  "name": "parallel_calculator",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist ein Rechenassistent. Rufe das Tool add für jede Addition auf – bei mehreren unabhängigen Additionen rufe es gleichzeitig mehrfach auf.",
+  "tools": [
+    {
+      "name": "add",
+      "description": "Addiert zwei Zahlen a und b",
+      "args": {
+        "type": "object",
+        "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+        "required": ["a", "b"]
+      },
+      "code_file": "03-werkzeuge/addiere.rs"
+    }
+  ],
+  "strategy": { "kind": "single_run", "params": { "parallel_tools": true } }
+}

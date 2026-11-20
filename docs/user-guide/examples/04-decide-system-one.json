@@ -1,0 +1,32 @@
+{
+  "spec_version": 1,
+  "name": "outage_check",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You are an on-call assistant. Write one short paragraph.",
+  "input": "string",
+  "output": "string",
+  "graph": {
+    "nodes": [
+      {
+        "id": "check",
+        "kind": "decide",
+        "params": {
+          "value": "string",
+          "kind": "yes_no",
+          "question": "Does the ticket report an outage that affects many users?",
+          "threshold": 0.7,
+          "yes": "Many users cannot use the product at all",
+          "no": "A single user or a minor problem",
+          "decider": "system_one"
+        }
+      },
+      { "id": "escalate", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "check" },
+      { "from": "check", "to": "escalate", "when": { "kind": "on_decision", "params": { "answers": ["yes"] } } },
+      { "from": "check", "to": "finish", "when": { "kind": "on_decision", "params": { "answers": ["no"] } } },
+      { "from": "escalate", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+[package]
+name = "grauwolf-generator"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+grauwolf-codegen.workspace = true
+grauwolf-spec.workspace = true
+grauwolf-tools.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+futures-executor.workspace = true
+futures-util.workspace = true
+grauwolf-agents.workspace = true
+grauwolf-interpreter.workspace = true
+grauwolf-llm.workspace = true
+grauwolf-test.workspace = true
+insta.workspace = true
+grauwolf-graph.workspace = true
+grauwolf-sandbox.workspace = true
+grauwolf-toolbuild.workspace = true
+grauwolf-spiffe = { workspace = true, features = ["testing"] }
+grauwolf-builtin-tools.workspace = true
+reqwest.workspace = true
+tokio.workspace = true
+wiremock.workspace = true
+serde_json.workspace = true

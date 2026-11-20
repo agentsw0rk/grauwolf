@@ -1,0 +1,8 @@
+{
+  "spec_version": 1,
+  "name": "tool_builder",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You solve tasks precisely. If you lack a tool, build it with create_tool and then use it.",
+  "self_tools": { "max_tools": 3 },
+  "strategy": { "kind": "single_run" }
+}

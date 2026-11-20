@@ -1,0 +1,37 @@
+[package]
+name = "grauwolf-k8-ops-app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+name = "grauwolf_k8_ops_app"
+path = "src/lib.rs"
+
+# The program is called `grauwolf-k8-ops` (ADR-0120); the package carries the `-app` suffix like
+# `grauwolf-tools-app`.
+[[bin]]
+name = "grauwolf-k8-ops"
+path = "src/main.rs"
+
+[dependencies]
+getrandom.workspace = true
+clap = { version = "4", features = ["derive"] }
+grauwolf-agent-tree.workspace = true
+grauwolf-config.workspace = true
+grauwolf-egress.workspace = true
+grauwolf-git.workspace = true
+grauwolf-k8s.workspace = true
+grauwolf-openbao.workspace = true
+grauwolf-spec.workspace = true
+rpassword = "7"
+serde_json.workspace = true
+toml.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "time"] }
+
+[dev-dependencies]
+git2.workspace = true
+grauwolf-k8s = { workspace = true, features = ["testing"] }
+grauwolf-test.workspace = true
+tokio = { workspace = true, features = ["macros", "rt"] }

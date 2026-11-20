@@ -1,0 +1,36 @@
+{
+  "spec_version": 1,
+  "name": "librarian",
+  "model": { "provider": "ollama", "id": "llama3.2" },
+  "system_prompt": "You answer questions about the architecture decisions (ADRs) of grauwolf. Search with search_adrs before every answer and name the source.",
+  "knowledge": {
+    "sources": ["../../docs/adr"],
+    "embedding_model": { "provider": "ollama", "id": "nomic-embed-text" },
+    "tool": "search_adrs",
+    "top_k": 3,
+    "index": "../../.grauwolf/knowledge/adr-index.json"
+  },
+  "graph": {
+    "nodes": [
+      { "id": "call_llm", "kind": "llm_request" },
+      { "id": "execute_tool", "kind": "execute_tool" },
+      { "id": "send_result", "kind": "llm_send_tool_result" },
+      { "id": "execute_tools_in_order", "kind": "execute_multiple_tools", "params": { "sequential": true } },
+      { "id": "send_results", "kind": "llm_send_multiple_tool_results" }
+    ],
+    "edges": [
+      { "from": "start", "to": "call_llm" },
+      { "from": "call_llm", "to": "execute_tool", "when": { "kind": "on_tool_call" } },
+      { "from": "call_llm", "to": "execute_tools_in_order", "when": { "kind": "on_multiple_tool_calls" } },
+      { "from": "call_llm", "to": "finish", "when": { "kind": "on_assistant_message" } },
+      { "from": "execute_tool", "to": "send_result" },
+      { "from": "send_result", "to": "execute_tool", "when": { "kind": "on_tool_call" } },
+      { "from": "send_result", "to": "execute_tools_in_order", "when": { "kind": "on_multiple_tool_calls" } },
+      { "from": "send_result", "to": "finish", "when": { "kind": "on_assistant_message" } },
+      { "from": "execute_tools_in_order", "to": "send_results" },
+      { "from": "send_results", "to": "execute_tool", "when": { "kind": "on_tool_call" } },
+      { "from": "send_results", "to": "execute_tools_in_order", "when": { "kind": "on_multiple_tool_calls" } },
+      { "from": "send_results", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

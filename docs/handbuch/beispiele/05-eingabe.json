@@ -1,0 +1,29 @@
+{
+  "spec_version": 1,
+  "name": "reply_letter",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du schreibst kurze, freundliche Antworten auf Kundenanfragen.",
+  "types": {
+    "Request": {
+      "type": "object",
+      "properties": {
+        "customer": { "type": "string" },
+        "text": { "type": "string" },
+        "customer_number": { "type": "integer" }
+      },
+      "required": ["customer", "text"]
+    }
+  },
+  "input": "Request",
+  "graph": {
+    "nodes": [
+      { "id": "concern", "kind": "get_field", "params": { "type": "Request", "field": "text" } },
+      { "id": "reply", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "concern" },
+      { "from": "concern", "to": "reply" },
+      { "from": "reply", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

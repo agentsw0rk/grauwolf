@@ -1,0 +1,25 @@
+{
+  "spec_version": 1,
+  "name": "chat_assistant",
+  "model": { "provider": "ollama", "id": "llama3.2" },
+  "system_prompt": "You are a helpful conversation partner. Answer briefly.",
+  "graph": {
+    "nodes": [
+      { "id": "compress", "kind": "compress_history",
+        "params": { "value": "string", "strategy": "facts", "keep": 10 } },
+      { "id": "call_llm", "kind": "llm_request" },
+      { "id": "execute_tools", "kind": "execute_multiple_tools" },
+      { "id": "send_results", "kind": "llm_send_multiple_tool_results" }
+    ],
+    "edges": [
+      { "from": "start", "to": "compress", "when": { "kind": "on_history_longer", "params": { "messages": 30 } } },
+      { "from": "start", "to": "call_llm" },
+      { "from": "compress", "to": "call_llm" },
+      { "from": "call_llm", "to": "execute_tools", "when": { "kind": "on_multiple_tool_calls" } },
+      { "from": "call_llm", "to": "finish", "when": { "kind": "on_assistant_message" } },
+      { "from": "execute_tools", "to": "send_results" },
+      { "from": "send_results", "to": "execute_tools", "when": { "kind": "on_multiple_tool_calls" } },
+      { "from": "send_results", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

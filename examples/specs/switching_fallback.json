@@ -1,0 +1,25 @@
+{
+  "spec_version": 1,
+  "name": "switching_fallback",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "graph": {
+    "nodes": [
+      {
+        "id": "switch",
+        "kind": "set_model",
+        "params": {
+          "provider": "ollama",
+          "id": "llama3.2",
+          "fallbacks": [ { "provider": "ollama", "id": "qwen3.5:9b" } ],
+          "value": "string"
+        }
+      },
+      { "id": "call_llm", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "switch" },
+      { "from": "switch", "to": "call_llm" },
+      { "from": "call_llm", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

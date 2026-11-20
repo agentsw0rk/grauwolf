@@ -1,0 +1,17 @@
+{
+  "spec_version": 1,
+  "name": "draft",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du schreibst sachliche Texte auf Deutsch.",
+  "graph": {
+    "nodes": [
+      { "id": "draft", "kind": "llm_request" },
+      { "id": "shorten", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "draft" },
+      { "from": "draft", "to": "shorten", "when": { "kind": "on_assistant_message" } },
+      { "from": "shorten", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

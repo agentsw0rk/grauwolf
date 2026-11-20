@@ -1,0 +1,14 @@
+{
+  "spec_version": 1,
+  "name": "app_assistant",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You are a personal assistant. Read notes with read_file.",
+  "builtin_tools": { "tools": ["read_file"], "root": "notes" },
+  "long_term_memory": {
+    "store": "memory.json",
+    "embedding_model": { "provider": "ollama", "id": "nomic-embed-text" },
+    "tools": false,
+    "auto_recall": true
+  },
+  "strategy": { "kind": "single_run" }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "{{name}}",
+  "version": "0.1.0",
+  "description": "What {{name}} is for, in one sentence",
+  "license": "Apache-2.0",
+  "authors": ["Your Name <you@example.com>"],
+  "tools": [
+    {
+      "name": "{{tool}}",
+      "description": "What `{{tool}}` does, in one sentence",
+      "args": {
+        "type": "object",
+        "properties": { "input": { "type": "string", "description": "The input of `{{tool}}`" } },
+        "required": ["input"]
+      },
+      "limits": { "fuel": 10000000, "time_ms": 1000 },
+      "capabilities": []
+    }
+  ]
+}

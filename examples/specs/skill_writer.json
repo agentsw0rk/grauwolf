@@ -1,0 +1,8 @@
+{
+  "spec_version": 1,
+  "name": "skill_writer",
+  "model": { "provider": "ollama", "id": "llama3.2" },
+  "system_prompt": "You write short poems. Use your skills when they fit.",
+  "skills": [{ "dir": "skills" }],
+  "strategy": { "kind": "single_run" }
+}

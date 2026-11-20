@@ -1,0 +1,20 @@
+# Only for `cargo test`: runs the code bodies in src/ as plain Rust functions. grauwolf builds the
+# tools itself (`grauwolf-tools pack`) and ignores this file.
+[package]
+name = "{{crate}}-tests"
+version = "0.0.0"
+edition = "2024"
+publish = false
+build = "tests/support/build.rs"
+autobins = false
+autoexamples = false
+autobenches = false
+
+[lib]
+path = "tests/support/lib.rs"
+# Nothing to test or document in the stub: `cargo test` runs only tests/<tool>.rs.
+test = false
+doctest = false
+
+[dev-dependencies]
+serde_json = "1"

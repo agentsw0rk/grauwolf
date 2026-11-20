@@ -1,0 +1,11 @@
+# Build context of docker/*.Dockerfile: only what the builds need.
+target/
+**/target/
+.git/
+.github/
+.grauwolf/
+agentweaver/
+koog/
+logo.png
+.claude/
+.env

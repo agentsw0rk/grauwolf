@@ -1,0 +1,15 @@
+{
+  "spec_version": 1,
+  "name": "reviewer",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist Prüfer. Ein guter Text hat eine Titelzeile und zwei oder drei Sätze. Wenn der Text gut ist, antworte mit dem einen Wort APPROVED. Sonst antworte mit REJECTED: und einem Satz Anmerkungen; verwende in diesem Fall niemals das Wort APPROVED.",
+  "graph": {
+    "nodes": [
+      { "id": "call_llm", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "call_llm" },
+      { "from": "call_llm", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

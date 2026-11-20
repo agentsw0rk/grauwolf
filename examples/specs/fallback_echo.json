@@ -1,0 +1,11 @@
+{
+  "spec_version": 1,
+  "name": "fallback_echo",
+  "model": {
+    "provider": "ollama",
+    "id": "qwen3.5:9b",
+    "fallbacks": [ { "provider": "openai", "id": "gpt-4o-mini" } ]
+  },
+  "system_prompt": "Repeat the user's message verbatim.",
+  "strategy": { "kind": "single_run" }
+}

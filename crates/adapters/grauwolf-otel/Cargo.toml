@@ -1,0 +1,16 @@
+[package]
+name = "grauwolf-otel"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+grauwolf-agents.workspace = true
+grauwolf-prompt.workspace = true
+opentelemetry.workspace = true
+opentelemetry_sdk.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+opentelemetry_sdk = { workspace = true, features = ["testing"] }

@@ -1,0 +1,25 @@
+# grauwolf-bedrock
+
+**Layer:** `adapters` · **Status:** done except the live check (ADR-0105). Live test `tests/live.rs` runs the conformance suite (opt-in: AWS credentials in the environment, `GRAUWOLF_BEDROCK_MODEL`, default `us.anthropic.claude-3-5-haiku-20241022-v1:0`) – not yet run against the real API: the adapter is verified only against handwritten responses and the SigV4 examples. `BedrockClient::new(Credentials, region)` (SigV4, `x-amz-security-token` for temporary credentials) or `with_api_key(key, region)` (`Authorization: Bearer`, no signing); `with_base_url`, `with_max_tokens` (without it the model's default applies). `LlmClient::execute`/`execute_with_usage` via `POST /model/{id}/converse` (model id URL-encoded; the signature double-encodes the path as SigV4 demands for non-S3 services): leading system messages → `system`, later ones as user text; consecutive messages of the same role are merged (the API wants alternating roles); blank text is left out; tools → `toolConfig.tools[].toolSpec`; tool choice `Required` → `any`, `Tool(name)` → `tool`, `Auto` not sent, `None` has no Converse equivalent: the tools are left out (kept with `auto` if the history already contains tool calls, because the API then requires `toolConfig`); tool results as `toolResult` with `json` (if the content is a JSON object) or `text`; attachments (ADR-0081) before the text as `image` (png, jpeg, gif, webp) and `document` (pdf, csv, doc, docx, xls, xlsx, html, txt, md; named `document-<n>`) blocks with `source.bytes` from Base64 or `s3Location` from an `s3://` URL – anything else (audio, video, other URLs) is a `LlmError::Client` before the request; structured output (`execute_structured`, ADR-0031) via a forced tool named after the type whose input schema is the answer's schema (a non-object root is wrapped in `{ value }` and unwrapped again; the tool call's input is returned as JSON text); `forces_tool_choice` is false for the models of ADR-0063 (also by their Bedrock ids), which then get the schema as an instruction instead; `execute_streaming` is real via `POST …/converse-stream` (`HttpClient::post_chunks` → `eventstream::Decoder`): text deltas at once, tool calls and reasoning blocks whole at `contentBlockStop` (tool input is collected from the partial JSON), usage from the closing `metadata` event (after `messageStop`, so `Usage` and `End { finish_reason: stopReason }` come when the transport ends); exception/error messages become `LlmError` (`throttlingException`, `serviceUnavailableException`, `internalServerException`, `modelTimeoutException` transient), a damaged frame or a stream cut off before `messageStop` is a `LlmError::Client`, after an error no further frames; `temperature` and `maxTokens` in `inferenceConfig`; `think` is ignored (ADR-0097: Ollama only); `reasoningContent` blocks → `Reasoning { provider: "bedrock" }`, returned unchanged, foreign reasoning dropped; usage with `cacheReadInputTokens`/`cacheWriteInputTokens` added to the input (ADR-0067); Converse does not report the answering model, so `Completion.model` is `None`; `guardrail_intervened`/`content_filtered` → `LlmError::Client`; HTTP 400/403/404 → `LlmError::Client` with an explanation (validation, model access, unknown model), 429/500/502/503/504 transient.  `eventstream::Decoder` decodes the AWS event stream framing (`application/vnd.amazon.eventstream`: prelude with total/headers length and CRC32, string headers `:message-type`/`:event-type`/`:exception-type`/`:error-code`/`:content-type`, payload, message CRC32; both checksums are verified, chunks may be split anywhere; `feed` + `next_message` deliver the messages before a damaged one; own `crc32`), tested with hand-built frames. `sigv4` implements AWS Signature Version 4 itself (canonical request, string to sign, HMAC-SHA256 key derivation; `sign`, `amz_date`, `Credentials` whose `Debug` hides the secrets) and is tested against the published AWS examples (signing key, IAM `ListUsers`, `get-vanilla`, `post-vanilla`).
+
+## Purpose
+LlmClient for the Amazon Bedrock Runtime Converse API with its own DTOs (ADR-0105).
+
+## Features / ADRs
+E02, E14 F14.18, ADR-0105
+
+## Allowed dependencies
+- grauwolf crates: grauwolf-llm, grauwolf-llm-http, grauwolf-prompt
+- External: serde, serde_json, futures-util, hmac, sha2; dev: grauwolf-test (conformance suite), tokio, wiremock
+
+Other dependencies only after checking against [ADR-0016](../../../docs/adr/0016-layered-architecture.md).
+
+## Invariants
+- Credentials and signatures never appear in `Debug` output, logs or error messages.
+- Passes the LlmClient conformance suite (live, opt-in, needs AWS credentials).
+- Integration tests against the real API are opt-in only.
+
+## Working on this crate
+- TDD: one test case per cycle, test + implementation + docs in one commit.
+- `cargo test -p grauwolf-bedrock`; before the commit `cargo fmt --all` and `cargo xtask check --affected`; before a push `cargo xtask check --full`.
+- Update this file when purpose, API, dependencies, or invariants change.

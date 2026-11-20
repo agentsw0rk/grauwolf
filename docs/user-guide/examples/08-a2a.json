@@ -1,0 +1,13 @@
+{
+  "spec_version": 1,
+  "name": "requester",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You pass questions about the house rules on to caretaker and repeat its answer.",
+  "agent_tools": {
+    "caretaker": {
+      "url": "http://127.0.0.1:8080",
+      "headers": { "Authorization": "Bearer ${CARETAKER_TOKEN}" }
+    }
+  },
+  "strategy": { "kind": "single_run" }
+}

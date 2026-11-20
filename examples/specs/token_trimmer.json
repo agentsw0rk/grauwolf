@@ -1,0 +1,22 @@
+{
+  "spec_version": 1,
+  "name": "token_trimmer",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Answer briefly and concisely.",
+  "graph": {
+    "nodes": [
+      {
+        "id": "trim",
+        "kind": "compress_history",
+        "params": { "value": "string", "strategy": "keep_last", "keep": 2 }
+      },
+      { "id": "call_llm", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "trim", "when": { "kind": "on_history_tokens_above", "params": { "tokens": 4 } } },
+      { "from": "start", "to": "call_llm" },
+      { "from": "trim", "to": "call_llm" },
+      { "from": "call_llm", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

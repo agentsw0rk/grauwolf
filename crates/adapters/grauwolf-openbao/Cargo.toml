@@ -1,0 +1,16 @@
+[package]
+name = "grauwolf-openbao"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+base64.workspace = true
+reqwest.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["time"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["net", "rt", "macros"] }
+wiremock.workspace = true

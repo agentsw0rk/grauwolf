@@ -1,0 +1,33 @@
+{
+  "spec_version": 1,
+  "name": "support_switch",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You are the customer service of an online shop. Answer in a friendly way and in English.",
+  "types": {
+    "Assessment": {
+      "type": "object",
+      "properties": {
+        "urgent": { "type": "boolean", "description": "true for data loss, payment problems or outages." },
+        "summary": { "type": "string", "description": "The concern in one sentence." },
+        "answer": { "type": "string", "description": "A short answer to the customer." }
+      },
+      "required": ["urgent", "summary", "answer"]
+    }
+  },
+  "graph": {
+    "nodes": [
+      { "id": "assess", "kind": "llm_request_structured", "params": { "type": "Assessment", "retries": 2 } },
+      { "id": "short_summary", "kind": "get_field", "params": { "type": "Assessment", "field": "summary" } },
+      { "id": "escalate", "kind": "llm_reason", "params": { "value": "string", "prompt": "Write a concise escalation to the on-call team: what happened, what needs to be done?" } },
+      { "id": "reply", "kind": "get_field", "params": { "type": "Assessment", "field": "answer" } }
+    ],
+    "edges": [
+      { "from": "start", "to": "assess" },
+      { "from": "assess", "to": "short_summary", "when": { "kind": "on_field", "params": { "field": "urgent", "equals": true } } },
+      { "from": "assess", "to": "reply" },
+      { "from": "short_summary", "to": "escalate" },
+      { "from": "escalate", "to": "finish" },
+      { "from": "reply", "to": "finish" }
+    ]
+  }
+}

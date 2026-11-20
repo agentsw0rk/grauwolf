@@ -1,0 +1,181 @@
+{
+  "spec_version": 1,
+  "name": "compact_calculator",
+  "model": {
+    "provider": "ollama",
+    "id": "llama3.2"
+  },
+  "system_prompt": "You are a calculator. Use the tools for every arithmetic operation.",
+  "tools": [
+    {
+      "name": "add",
+      "description": "Adds two numbers",
+      "args": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "number"
+          },
+          "b": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "a",
+          "b"
+        ]
+      },
+      "code": "let a = args[\"a\"].as_f64().ok_or(\"a missing\")?;\nlet b = args[\"b\"].as_f64().ok_or(\"b missing\")?;\nOk((a + b).to_string())"
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "id": "call_llm",
+        "kind": "llm_request"
+      },
+      {
+        "id": "execute_tool",
+        "kind": "execute_tool"
+      },
+      {
+        "id": "send_result",
+        "kind": "llm_send_tool_result"
+      },
+      {
+        "id": "execute_tools_in_order",
+        "kind": "execute_multiple_tools",
+        "params": {
+          "sequential": true
+        }
+      },
+      {
+        "id": "compact_results",
+        "kind": "compress_history",
+        "params": {
+          "value": "tool_results",
+          "strategy": "keep_last",
+          "keep": 1
+        }
+      },
+      {
+        "id": "send_results",
+        "kind": "llm_send_multiple_tool_results"
+      },
+      {
+        "id": "compact",
+        "kind": "compress_history",
+        "params": {
+          "value": "tool_result",
+          "strategy": "keep_last",
+          "keep": 1
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "to": "call_llm"
+      },
+      {
+        "from": "call_llm",
+        "to": "execute_tool",
+        "when": {
+          "kind": "on_tool_call"
+        }
+      },
+      {
+        "from": "call_llm",
+        "to": "execute_tools_in_order",
+        "when": {
+          "kind": "on_multiple_tool_calls"
+        }
+      },
+      {
+        "from": "call_llm",
+        "to": "finish",
+        "when": {
+          "kind": "on_assistant_message"
+        }
+      },
+      {
+        "from": "execute_tool",
+        "to": "compact",
+        "when": {
+          "kind": "on_history_longer",
+          "params": {
+            "messages": 2
+          }
+        }
+      },
+      {
+        "from": "execute_tool",
+        "to": "send_result"
+      },
+      {
+        "from": "compact",
+        "to": "send_result"
+      },
+      {
+        "from": "send_result",
+        "to": "execute_tool",
+        "when": {
+          "kind": "on_tool_call"
+        }
+      },
+      {
+        "from": "send_result",
+        "to": "execute_tools_in_order",
+        "when": {
+          "kind": "on_multiple_tool_calls"
+        }
+      },
+      {
+        "from": "send_result",
+        "to": "finish",
+        "when": {
+          "kind": "on_assistant_message"
+        }
+      },
+      {
+        "from": "execute_tools_in_order",
+        "to": "compact_results",
+        "when": {
+          "kind": "on_history_longer",
+          "params": {
+            "messages": 2
+          }
+        }
+      },
+      {
+        "from": "execute_tools_in_order",
+        "to": "send_results"
+      },
+      {
+        "from": "compact_results",
+        "to": "send_results"
+      },
+      {
+        "from": "send_results",
+        "to": "execute_tool",
+        "when": {
+          "kind": "on_tool_call"
+        }
+      },
+      {
+        "from": "send_results",
+        "to": "execute_tools_in_order",
+        "when": {
+          "kind": "on_multiple_tool_calls"
+        }
+      },
+      {
+        "from": "send_results",
+        "to": "finish",
+        "when": {
+          "kind": "on_assistant_message"
+        }
+      }
+    ]
+  }
+}

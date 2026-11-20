@@ -1,0 +1,24 @@
+{
+  "spec_version": 1,
+  "name": "thoughtful_calculator",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You are a calculation assistant. Use the tool add for every addition and answer in English.",
+  "tools": [
+    {
+      "name": "add",
+      "description": "Adds two numbers a and b",
+      "args": {
+        "type": "object",
+        "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+        "required": ["a", "b"]
+      },
+      "code_file": "03-tools/add.rs"
+    }
+  ],
+  "strategy": {
+    "kind": "react",
+    "params": {
+      "reasoning_prompt": "Think briefly about which calculation step is needed next. Do not call a tool yet."
+    }
+  }
+}

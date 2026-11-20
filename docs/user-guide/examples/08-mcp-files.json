@@ -1,0 +1,14 @@
+{
+  "spec_version": 1,
+  "name": "file_guide",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You answer questions about files in the shared directory. Look things up with the tools instead of guessing.",
+  "mcp_servers": {
+    "files": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+      "tools": ["list_directory", "read_text_file"]
+    }
+  },
+  "strategy": { "kind": "single_run" }
+}

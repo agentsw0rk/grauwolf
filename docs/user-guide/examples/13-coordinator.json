@@ -1,0 +1,23 @@
+{
+  "spec_version": 1,
+  "name": "coordinator",
+  "model": {
+    "provider": "ollama",
+    "id": "qwen3.5:9b"
+  },
+  "system_prompt": "You pass drafts on to the reviewer and summarize its review in two sentences.",
+  "agent_tools": {
+    "reviewer": {
+      "url": "https://reviewer.reviewer.svc:8443",
+      "description": "Reviews a short text and names its main problems",
+      "auth": {
+        "spiffe": {
+          "id": "spiffe://agentswork.de/ns/reviewer/sa/reviewer"
+        }
+      }
+    }
+  },
+  "strategy": {
+    "kind": "single_run"
+  }
+}

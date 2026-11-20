@@ -1,0 +1,110 @@
+# The test git server in its mTLS mode (ADR-0110), for the live check of the git tools with
+# SPIFFE. Replace the placeholders (or fill them with sed/envsubst):
+#   ${NAMESPACE}   namespace of the server (restricted Pod Security Standard is fine)
+#   ${IMAGE}       the image built from docker/test-git-server.Dockerfile
+#   ${TRUST_DOMAIN} the trust domain of SPIRE (agentswork.de)
+# Not for production. Nothing here is applied for you.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-git-server
+  namespace: ${NAMESPACE}
+---
+# The registration of the server's pods: its SPIFFE ID is spiffe://${TRUST_DOMAIN}/ns/${NAMESPACE}/sa/test-git-server
+# (the default template of the ClusterSPIFFEID of the SPIRE setup, see examples/spire-openbao).
+apiVersion: spire.spiffe.io/v1alpha1
+kind: ClusterSPIFFEID
+metadata:
+  name: test-git-server
+spec:
+  spiffeIDTemplate: "spiffe://{{ .TrustDomain }}/ns/{{ .PodMeta.Namespace }}/sa/{{ .PodSpec.ServiceAccountName }}"
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: test-git-server
+  namespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: ${NAMESPACE}
+---
+# Who may read and who may push: the content of mapping.json. A change is picked up at the next
+# request (the file is read again every time; a ConfigMap update takes about a minute).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-git-server-mapping
+  namespace: ${NAMESPACE}
+data:
+  mapping.json: |
+    {
+      "spiffe://${TRUST_DOMAIN}/ns/agents/sa/writer": { "user": "writer", "push": true },
+      "spiffe://${TRUST_DOMAIN}/ns/agents/*": { "user": "agents", "push": false }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-git-server
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: test-git-server
+spec:
+  # One replica: the repository lives in the pod's /tmp and is reseeded at every start.
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: test-git-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: test-git-server
+    spec:
+      serviceAccountName: test-git-server
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: test-git-server
+          image: ${IMAGE}
+          # The default command of the image; shown here for clarity.
+          args: ["/seed", "", "8443", "--bind", "0.0.0.0", "--spiffe", "/etc/test-git-server/mapping.json"]
+          env:
+            - name: SPIFFE_ENDPOINT_SOCKET
+              value: unix:///spiffe-workload-api/agent.sock
+          ports:
+            - name: git
+              containerPort: 8443
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: mapping, mountPath: /etc/test-git-server, readOnly: true }
+            - { name: spiffe-workload-api, mountPath: /spiffe-workload-api, readOnly: true }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: mapping
+          configMap:
+            name: test-git-server-mapping
+        # The SPIFFE CSI driver mounts the SPIRE agent's socket; the file name in it depends on
+        # the agent's configuration (agent.sock as in examples/spire-openbao;
+        - name: spiffe-workload-api
+          csi:
+            driver: csi.spiffe.io
+            readOnly: true
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-git-server
+  namespace: ${NAMESPACE}
+spec:
+  selector:
+    app.kubernetes.io/name: test-git-server
+  ports:
+    - name: git
+      port: 8443
+      targetPort: git

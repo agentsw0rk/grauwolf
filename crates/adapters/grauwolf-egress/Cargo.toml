@@ -1,0 +1,15 @@
+[package]
+name = "grauwolf-egress"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+grauwolf-agent-tree.workspace = true
+grauwolf-spec.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+
+[dev-dependencies]
+grauwolf-test.workspace = true

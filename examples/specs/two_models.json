@@ -1,0 +1,72 @@
+{
+  "spec_version": 1,
+  "name": "two_models",
+  "model": {
+    "provider": "ollama",
+    "id": "llama3.2"
+  },
+  "system_prompt": "You write short drafts with a small model and summarize them in one sentence with a larger one.",
+  "subgraphs": {
+    "draft": {
+      "input": "string",
+      "output": "string",
+      "graph": {
+        "nodes": [
+          {
+            "id": "write",
+            "kind": "llm_request"
+          }
+        ],
+        "edges": [
+          {
+            "from": "start",
+            "to": "write"
+          },
+          {
+            "from": "write",
+            "to": "finish",
+            "when": {
+              "kind": "on_assistant_message"
+            }
+          }
+        ]
+      },
+      "model": {
+        "provider": "ollama",
+        "id": "qwen3.5:9b"
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "draft",
+        "kind": "subgraph",
+        "params": {
+          "subgraph": "draft"
+        }
+      },
+      {
+        "id": "summarize",
+        "kind": "llm_request"
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "to": "draft"
+      },
+      {
+        "from": "draft",
+        "to": "summarize"
+      },
+      {
+        "from": "summarize",
+        "to": "finish",
+        "when": {
+          "kind": "on_assistant_message"
+        }
+      }
+    ]
+  }
+}

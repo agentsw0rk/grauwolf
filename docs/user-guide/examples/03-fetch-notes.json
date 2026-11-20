@@ -1,0 +1,16 @@
+{
+  "spec_version": 1,
+  "name": "researcher",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You research web pages. Fetch the page, think about what it says, keep a todo list for what is left to do and note the findings with store_value. Answer in English.",
+  "builtin_tools": {
+    "tools": [
+      "think", "fetch",
+      "store_value", "retrieve_value", "list_keys",
+      "add_task", "complete_task", "remove_task", "list_tasks"
+    ],
+    "root": "03-tools/workspace",
+    "fetch": { "allowed_hosts": ["example.com", "*.wikipedia.org"] }
+  },
+  "strategy": { "kind": "react" }
+}

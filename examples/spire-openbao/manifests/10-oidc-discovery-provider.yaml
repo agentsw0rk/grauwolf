@@ -1,0 +1,106 @@
+# SPIRE OIDC discovery provider: serves the JWKS (the public keys that sign JWT-SVIDs) so that
+# OpenBao can verify the JWT-SVIDs of the agents. It gets the keys from the SPIRE agent's
+# Workload API, so it is itself a workload with an entry (ClusterSPIFFEID below). It runs in a
+# namespace of its own: spire-controller-manager skips the namespaces in its `ignoreNamespaces`
+# (usually spire-system), and a pod there would get no SPIFFE ID and serve no keys.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ${OIDC_NAMESPACE}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spire-oidc-discovery-provider
+  namespace: ${OIDC_NAMESPACE}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spire-oidc-discovery-provider
+  namespace: ${OIDC_NAMESPACE}
+data:
+  oidc-discovery-provider.conf: |
+    log_level = "INFO"
+    domains = ["${OIDC_SERVICE}", "spire-oidc-discovery-provider", "localhost"]
+    # Plain HTTP inside the cluster; put TLS in front for anything that leaves it.
+    allow_insecure_scheme = true
+    insecure_addr = ":8080"
+    workload_api {
+      socket_path = "/spiffe-workload-api/agent.sock"
+      trust_domain = "${TRUST_DOMAIN}"
+    }
+    health_checks {
+      listener_enabled = true
+      bind_port = 8008
+      live_path = "/live"
+      ready_path = "/ready"
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spire-oidc-discovery-provider
+  namespace: ${OIDC_NAMESPACE}
+  labels:
+    app.kubernetes.io/name: spire-oidc-discovery-provider
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: spire-oidc-discovery-provider
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: spire-oidc-discovery-provider
+    spec:
+      serviceAccountName: spire-oidc-discovery-provider
+      containers:
+        - name: oidc-discovery-provider
+          image: ghcr.io/spiffe/oidc-discovery-provider:1.15.5
+          args: ["-config", "/run/spire/oidc/config/oidc-discovery-provider.conf"]
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /ready, port: 8008 }
+          livenessProbe:
+            httpGet: { path: /live, port: 8008 }
+          volumeMounts:
+            - { name: config, mountPath: /run/spire/oidc/config, readOnly: true }
+            - { name: spiffe-workload-api, mountPath: /spiffe-workload-api, readOnly: true }
+      volumes:
+        - name: config
+          configMap:
+            name: spire-oidc-discovery-provider
+        - name: spiffe-workload-api
+          csi:
+            driver: csi.spiffe.io
+            readOnly: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spire-oidc-discovery-provider
+  namespace: ${OIDC_NAMESPACE}
+spec:
+  selector:
+    app.kubernetes.io/name: spire-oidc-discovery-provider
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+# The registration entry of the discovery provider itself (spire-controller-manager).
+apiVersion: spire.spiffe.io/v1alpha1
+kind: ClusterSPIFFEID
+metadata:
+  name: spire-oidc-discovery-provider
+spec:
+  spiffeIDTemplate: "spiffe://{{ .TrustDomain }}/ns/{{ .PodMeta.Namespace }}/sa/{{ .PodSpec.ServiceAccountName }}"
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: spire-oidc-discovery-provider
+  namespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: ${OIDC_NAMESPACE}

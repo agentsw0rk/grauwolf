@@ -1,0 +1,41 @@
+{
+  "spec_version": 1,
+  "name": "pros_and_cons",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You help with decisions. If there are several points of view, weigh them up and give a recommendation in two sentences.",
+  "subgraphs": {
+    "pro": {
+      "graph": {
+        "nodes": [
+          { "id": "view", "kind": "llm_reason", "params": { "value": "string", "prompt": "Name the strongest arguments in favour in two sentences." } }
+        ],
+        "edges": [
+          { "from": "start", "to": "view" },
+          { "from": "view", "to": "finish" }
+        ]
+      }
+    },
+    "contra": {
+      "graph": {
+        "nodes": [
+          { "id": "view", "kind": "llm_reason", "params": { "value": "string", "prompt": "Name the strongest arguments against in two sentences." } }
+        ],
+        "edges": [
+          { "from": "start", "to": "view" },
+          { "from": "view", "to": "finish" }
+        ]
+      }
+    }
+  },
+  "graph": {
+    "nodes": [
+      { "id": "views", "kind": "parallel", "params": { "subgraphs": ["pro", "contra"], "merge": "concat" } },
+      { "id": "weigh", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "views" },
+      { "from": "views", "to": "weigh" },
+      { "from": "weigh", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

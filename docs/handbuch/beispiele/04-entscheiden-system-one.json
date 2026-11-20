@@ -1,0 +1,32 @@
+{
+  "spec_version": 1,
+  "name": "outage_check",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bist ein Bereitschaftsassistent. Schreibe einen kurzen Absatz.",
+  "input": "string",
+  "output": "string",
+  "graph": {
+    "nodes": [
+      {
+        "id": "check",
+        "kind": "decide",
+        "params": {
+          "value": "string",
+          "kind": "yes_no",
+          "question": "Meldet das Ticket eine Störung, die viele Nutzer betrifft?",
+          "threshold": 0.7,
+          "yes": "Viele Nutzer können das Produkt gar nicht verwenden",
+          "no": "Ein einzelner Nutzer oder ein kleineres Problem",
+          "decider": "system_one"
+        }
+      },
+      { "id": "escalate", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "check" },
+      { "from": "check", "to": "escalate", "when": { "kind": "on_decision", "params": { "answers": ["yes"] } } },
+      { "from": "check", "to": "finish", "when": { "kind": "on_decision", "params": { "answers": ["no"] } } },
+      { "from": "escalate", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

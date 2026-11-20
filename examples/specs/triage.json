@@ -1,0 +1,30 @@
+{
+  "spec_version": 1,
+  "name": "triage",
+  "model": { "provider": "ollama", "id": "llama3.2" },
+  "system_prompt": "You turn bug reports into tickets.",
+  "types": {
+    "Ticket": {
+      "type": "object",
+      "description": "A ticket created from a bug report.",
+      "properties": {
+        "title": { "type": "string", "description": "Short summary." },
+        "priority": { "type": "integer", "description": "1 (highest) to 4." },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "estimate": { "type": "number", "description": "Effort in hours." }
+      },
+      "required": ["title", "priority", "tags"]
+    }
+  },
+  "input": "string",
+  "output": "Ticket",
+  "graph": {
+    "nodes": [
+      { "id": "triage", "kind": "llm_request_structured", "params": { "type": "Ticket", "retries": 1 } }
+    ],
+    "edges": [
+      { "from": "start", "to": "triage" },
+      { "from": "triage", "to": "finish" }
+    ]
+  }
+}

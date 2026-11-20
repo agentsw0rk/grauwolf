@@ -1,0 +1,12 @@
+{
+  "spec_version": 1,
+  "name": "reviewer",
+  "model": {
+    "provider": "ollama",
+    "id": "qwen3.5:9b"
+  },
+  "system_prompt": "You review short texts. Name the two most important problems and one thing that works well.",
+  "strategy": {
+    "kind": "single_run"
+  }
+}

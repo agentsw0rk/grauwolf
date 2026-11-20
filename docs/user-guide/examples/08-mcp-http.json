@@ -1,0 +1,13 @@
+{
+  "spec_version": 1,
+  "name": "repo_explainer",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Answer questions about GitHub repositories with the DeepWiki tools. Answer in English.",
+  "mcp_servers": {
+    "deepwiki": {
+      "url": "https://mcp.deepwiki.com/mcp",
+      "tools": ["read_wiki_structure", "ask_wiki_question"]
+    }
+  },
+  "strategy": { "kind": "single_run" }
+}

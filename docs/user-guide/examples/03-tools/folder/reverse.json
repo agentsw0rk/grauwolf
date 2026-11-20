@@ -1,0 +1,10 @@
+{
+  "name": "reverse",
+  "description": "Writes a text backwards",
+  "args": {
+    "type": "object",
+    "properties": { "text": { "type": "string" } },
+    "required": ["text"]
+  },
+  "code": "let text = args[\"text\"].as_str().ok_or(\"text is missing\")?;\nOk(text.chars().rev().collect::<String>())"
+}

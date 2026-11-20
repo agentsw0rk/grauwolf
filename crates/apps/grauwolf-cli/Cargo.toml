@@ -1,0 +1,46 @@
+[package]
+name = "grauwolf-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+name = "grauwolf_cli"
+path = "src/lib.rs"
+
+[[bin]]
+name = "grauwolf"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+grauwolf-agents.workspace = true
+grauwolf-builder-agent.workspace = true
+grauwolf-egress.workspace = true
+grauwolf-generator.workspace = true
+# The CLI keeps all provider and tool features the facade used to switch on (all on by default in the host).
+grauwolf-host = { workspace = true, features = ["ollama", "openai", "anthropic", "gemini", "bedrock", "sandbox", "mcp", "builtin", "git", "fetch", "command", "atlassian", "sql", "pgvector", "otel", "a2a", "systemone", "packages", "credentials"] }
+grauwolf-interpreter.workspace = true
+grauwolf-llm.workspace = true
+grauwolf-prompt.workspace = true
+grauwolf-server = { workspace = true, features = ["ollama", "service"] }
+grauwolf-toolpkg.workspace = true
+axum = { workspace = true }
+grauwolf-spec.workspace = true
+grauwolf-toolbuild.workspace = true
+grauwolf-tools.workspace = true
+grauwolf-tools-app.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["io-std", "net", "signal"] }
+
+[dev-dependencies]
+futures-util.workspace = true
+grauwolf-identity = { workspace = true, features = ["testing"] }
+grauwolf-spiffe = { workspace = true, features = ["testing"] }
+grauwolf-test.workspace = true
+grauwolf-git = { workspace = true, features = ["test-git-server"] }
+grauwolf-toolpkg = { workspace = true, features = ["test-registry"] }
+reqwest = { workspace = true }
+tokio.workspace = true
+wiremock.workspace = true

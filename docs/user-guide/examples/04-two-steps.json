@@ -1,0 +1,17 @@
+{
+  "spec_version": 1,
+  "name": "draft_and_shorten",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "First you write a paragraph in English on a topic. When you then get your paragraph back, you shorten it to at most two sentences and output only those.",
+  "graph": {
+    "nodes": [
+      { "id": "draft", "kind": "llm_request" },
+      { "id": "shorten", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "draft" },
+      { "from": "draft", "to": "shorten", "when": { "kind": "on_assistant_message" } },
+      { "from": "shorten", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

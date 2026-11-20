@@ -1,0 +1,7 @@
+{
+  "spec_version": 1,
+  "name": "chatterbox",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You are a friendly conversation partner. Answer briefly and in English.",
+  "strategy": { "kind": "chat", "params": { "max_messages": 20, "keep": 6 } }
+}

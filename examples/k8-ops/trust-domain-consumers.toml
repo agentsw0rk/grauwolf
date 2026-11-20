@@ -1,0 +1,20 @@
+# Systems outside SPIRE that hold the trust domain, for
+#   grauwolf-k8-ops trust-domain set <new domain> --consumers examples/k8-ops/trust-domain-consumers.toml
+#
+# This is the file for scion: its ACL names agents by SPIFFE ID, and its configuration names the
+# trust domain. Copy it and adapt the namespaces and names to your cluster.
+
+# A ConfigMap to rewrite. In its text only `spiffe://<old domain>` (followed by `/`, a quote,
+# white space or the end) and the quoted value "<old domain>" change; `foo.<old domain>` stays.
+# Without `keys` all keys of the ConfigMap are rewritten.
+[[configmap]]
+namespace = "scion"
+name = "scion-server"
+keys = ["acl.toml", "scion-server.toml"]
+
+# A workload to restart after the new trust bundle is in place (so that it reads the new text and
+# gets a new SVID). kind: Deployment, StatefulSet or DaemonSet.
+[[restart]]
+kind = "Deployment"
+namespace = "scion"
+name = "scion-server"

@@ -1,0 +1,12 @@
+# Tool-Richtlinie: neben der Spec (oder über GRAUWOLF_TOOL_POLICY benannt). Pfade sind relativ zu dieser Datei.
+[tool_packages]
+# Registries oder Registry/Repository-Präfixe, die verwendet werden dürfen. Fehlt die Liste: alle; leere Liste: keine.
+allowed_registries = ["registry.example.com/team", "ghcr.io/example"]
+# Git-Hosts oder Host/Pfad-Präfixe, die verwendet werden dürfen. Fehlt die Liste: alle; leere Liste: keine.
+allowed_git_hosts = ["github.com/example"]
+# Jedes Paket muss von einem der unten genannten Schlüssel signiert sein.
+require_signatures = true
+# Öffentliche Schlüssel (PEM) für OCI-Pakete: von `grauwolf tools keygen` oder cosign.
+oci_keys = ["keys/team.pub"]
+# Unterzeichner von Git-Commits und Tags, im Format von gits gpg.ssh.allowedSignersFile.
+git_allowed_signers = "keys/allowed_signers"

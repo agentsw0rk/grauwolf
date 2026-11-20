@@ -1,0 +1,17 @@
+{
+  "spec_version": 1,
+  "name": "file_counter",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "You answer questions about the files in the workspace folder. Use run_command with the programs ls and wc; do not guess. Answer in English.",
+  "builtin_tools": {
+    "tools": ["run_command"],
+    "root": "03-tools/workspace",
+    "command": {
+      "allowed": ["ls", "wc"],
+      "timeout_secs": 20,
+      "max_output_bytes": 16384,
+      "env": ["PATH", "LANG"]
+    }
+  },
+  "strategy": { "kind": "single_run" }
+}

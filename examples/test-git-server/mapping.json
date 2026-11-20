@@ -1,0 +1,4 @@
+{
+  "spiffe://agentswork.de/ns/agents/sa/writer": { "user": "writer", "push": true },
+  "spiffe://agentswork.de/ns/agents/*": { "user": "agents", "push": false }
+}

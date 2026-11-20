@@ -1,0 +1,13 @@
+{
+  "spec_version": 1,
+  "name": "sampling_echo",
+  "model": {
+    "provider": "ollama",
+    "id": "qwen3.5:9b",
+    "temperature": 0,
+    "think": false,
+    "fallbacks": [ { "provider": "openai", "id": "gpt-4o-mini", "temperature": 0.2 } ]
+  },
+  "system_prompt": "Repeat the user's message verbatim.",
+  "strategy": { "kind": "single_run" }
+}

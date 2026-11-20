@@ -1,0 +1,11 @@
+{
+  "spec_version": 1,
+  "name": "notes_helper",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du hilfst bei den Notizen im Arbeitsordner. Schlage nach, bevor du antwortest, und frage nach, wenn etwas unklar ist. Antworte auf Deutsch.",
+  "builtin_tools": {
+    "tools": ["list_directory", "read_file", "search_files", "ask_user"],
+    "root": "03-werkzeuge/arbeitsordner"
+  },
+  "strategy": { "kind": "single_run" }
+}

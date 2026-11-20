@@ -1,0 +1,17 @@
+{
+  "spec_version": 1,
+  "name": "draft_and_shorten",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Zuerst schreibst du einen Absatz auf Deutsch zu einem Thema. Wenn du deinen Absatz zurückbekommst, kürzt du ihn auf höchstens zwei Sätze und gibst nur diese aus.",
+  "graph": {
+    "nodes": [
+      { "id": "draft", "kind": "llm_request" },
+      { "id": "shorten", "kind": "llm_request" }
+    ],
+    "edges": [
+      { "from": "start", "to": "draft" },
+      { "from": "draft", "to": "shorten", "when": { "kind": "on_assistant_message" } },
+      { "from": "shorten", "to": "finish", "when": { "kind": "on_assistant_message" } }
+    ]
+  }
+}

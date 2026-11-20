@@ -1,0 +1,61 @@
+{
+  "spec_version": 1,
+  "name": "review_loop",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du bestätigst, dass ein Text gespeichert wurde. Antworte mit dem einen Wort Gespeichert.",
+  "agent_tools": {
+    "writer": { "spec": "06-goap-pruefung/schreiber.json", "description": "Schreibt oder überarbeitet einen kurzen Text" },
+    "reviewer": { "spec": "06-goap-pruefung/pruefer.json", "description": "Antwortet mit APPROVED oder REJECTED samt Anmerkungen" }
+  },
+  "subgraphs": {
+    "save": { "graph": {
+      "nodes": [ { "id": "save", "kind": "llm_request" } ],
+      "edges": [ { "from": "start", "to": "save" },
+                 { "from": "save", "to": "finish", "when": { "kind": "on_assistant_message" } } ] } }
+  },
+  "graph": {
+    "nodes": [
+      { "id": "editor", "kind": "goap", "params": {
+        "state": {
+          "topic": "", "draft": "", "feedback": "",
+          "written": false, "reviewed": false, "approved": false, "saved": false,
+          "review_attempts": 0
+        },
+        "input_fact": "topic",
+        "output_fact": "draft",
+        "actions": [
+          { "name": "write", "agent": "writer",
+            "input": "Schreibe einen kurzen Text mit Titel zu: {{topic}}",
+            "output_fact": "draft",
+            "pre": { "written": false },
+            "effects": { "written": true, "reviewed": false } },
+          { "name": "review", "agent": "reviewer",
+            "input": "Prüfe diesen Text:\n{{draft}}",
+            "output_fact": "feedback",
+            "pre": { "written": true, "reviewed": false },
+            "effects": { "reviewed": true, "approved": true },
+            "success_contains": "APPROVED",
+            "on_failure": { "reviewed": true, "review_attempts": { "add": 1 } } },
+          { "name": "fix", "agent": "writer",
+            "input": "Überarbeite den Text gemäß den Anmerkungen.\n\nText:\n{{draft}}\n\nAnmerkungen:\n{{feedback}}",
+            "output_fact": "draft",
+            "pre": { "reviewed": true, "approved": false, "review_attempts": { "lt": 3 } },
+            "effects": { "reviewed": false } },
+          { "name": "save", "subgraph": "save",
+            "input": "Der Text wurde freigegeben:\n{{draft}}",
+            "pre": { "approved": true },
+            "effects": { "saved": true } }
+        ],
+        "goals": [
+          { "name": "saved", "facts": { "saved": true }, "priority": 1 },
+          { "name": "give_up", "facts": { "reviewed": true, "review_attempts": { "ge": 3 } } }
+        ],
+        "max_iterations": 12
+      } }
+    ],
+    "edges": [
+      { "from": "start", "to": "editor" },
+      { "from": "editor", "to": "finish" }
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "spec_version": 1,
+  "name": "toolbox",
+  "model": { "provider": "ollama", "id": "qwen3.5:9b" },
+  "system_prompt": "Du hilfst bei Texten. Nutze passende Tools, sofern vorhanden.",
+  "tools_dir": "03-werkzeuge/ordner",
+  "strategy": { "kind": "single_run" }
+}

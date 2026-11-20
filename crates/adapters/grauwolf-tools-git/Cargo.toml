@@ -1,0 +1,22 @@
+[package]
+name = "grauwolf-tools-git"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+futures-util.workspace = true
+git2.workspace = true
+grauwolf-git.workspace = true
+grauwolf-prompt.workspace = true
+grauwolf-spiffe.workspace = true
+grauwolf-tools.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["rt", "sync", "time"] }
+
+[dev-dependencies]
+grauwolf-git = { workspace = true, features = ["test-git-server"] }
+grauwolf-spiffe = { workspace = true, features = ["testing"] }
+grauwolf-test.workspace = true
+tokio.workspace = true

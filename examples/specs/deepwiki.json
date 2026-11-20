@@ -1,0 +1,10 @@
+{
+  "spec_version": 1,
+  "name": "deepwiki_agent",
+  "model": { "provider": "ollama", "id": "llama3.2" },
+  "system_prompt": "Answer questions about GitHub repositories using the DeepWiki tools.",
+  "mcp_servers": {
+    "deepwiki": { "url": "https://mcp.deepwiki.com/mcp", "tools": ["read_wiki_structure", "ask_wiki_question"] }
+  },
+  "strategy": { "kind": "single_run" }
+}
